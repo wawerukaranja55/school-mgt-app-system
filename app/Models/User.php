@@ -21,7 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_approved'
+        'is_approved',
+        'role_id',
+        'grade_id'
     ];
 
     /**
@@ -45,6 +47,10 @@ class User extends Authenticatable
     ];
 
     public function roles(){
-        return $this->belongsToMany('App\Models\Role','role_user','user_id','role_id');
+        return $this->belongsTo('App\Models\Role','role_id','id');
+    }
+
+    public function classes(){
+        return $this->belongsTo('App\Models\Grade','grade_id','id');
     }
 }

@@ -50,23 +50,24 @@
                                     <div class="row section-groups">
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Pupil Name<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required name="pupil_name" placeholder="Write The pupil official Name">
+                                            <input type="text" class="form-control text-white bg-dark pupil-name" required name="pupil_name" placeholder="Write The pupil official Name">
                                         </div>
                 
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Pupil Registration number<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required name="pupil_reg_number" placeholder="Write The Pupil Regstration Number">
+                                            <input type="text" class="form-control text-white bg-dark reg-number" required name="pupil_reg_number" placeholder="Write The Pupil Regstration Number">
                                         </div>
                                     </div>
 
                                     <div class="row section-groups">
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Year Joined<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required name="year_joined" placeholder="Write a slug for the Rental House Name">
+                                            <input type="text" class="form-control text-white bg-dark" required readonly id="year_joined_picker" name="year_joined" placeholder="Select the year pupil was admitted">
+                                            <span class="date-icon"><i class="fa-solid fa-calendar"></i></span>
                                         </div>
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Pupil Grade(class)<span class="text-danger inputrequired">*</span></label><br>
-                                            <select name="grad_id" class="adminselect2 form-control text-white bg-dark" style="width: 100%;" required>
+                                            <select name="grad_id" id="grad-id" class="adminselect2 form-control text-white bg-dark" style="width: 100%;" required>
                                                 <option value=" " disabled selected>Choose a Grade</option>
                                                 @foreach($all_grades as $grade)
                                                     <option value="{{ $grade['id'] }}"
@@ -80,13 +81,13 @@
 
                                     <div class="row section-groups">
                                         <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Guardian Name<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required name="pupil_guardian_name" placeholder="Write The pupil Guardian Name">
+                                            <label>Pupil Guardian/Parent Name<span class="text-danger inputrequired">*</span></label>
+                                            <input type="text" class="form-control text-white bg-dark guardian-name" required name="pupil_guardian_name" placeholder="Write The pupil Guardian Name">
                                         </div>
                 
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Pupil Guardian Phone Number<span class="text-danger inputrequired">*</span></label>
-                                            <input type="number" class="form-control text-white bg-dark" required name="pupil_guardian_phone" placeholder="Write The pupil Guardian Phone Number">
+                                            <input type="number" class="form-control text-white bg-dark guardian-phone" required name="pupil_guardian_phone" placeholder="Write The pupil Guardian Phone Number">
                                         </div>
                                     </div>
                                 </div>
@@ -110,9 +111,9 @@
     <script>
 
         $(function() {
-            $('#event_date_picker').datepicker({
+            $('#year_joined_picker').datepicker({
                 dateFormat: 'dd.mm.yy',
-                minDate: 0,
+                // minDate: 0,
                 calendarWeeks: true,
                 autoclose: true,
                 todayHighlight: true,
@@ -123,7 +124,7 @@
             });
             
             $('.date-icon').on('click', function() {
-                $('#event_date_picker').focus();
+                $('#year_joined_picker').focus();
             })
         });
 
@@ -136,7 +137,7 @@
 
             var form = $('#add-new-pupil-form')[0];
             var formdata=new FormData(form);
-
+            $('#error_list').html(" ");
             $.ajax({
                 url:url,
                 method:'POST',
@@ -146,7 +147,7 @@
                 success:function(response)
                 {
                 console.log(response);
-                if (response.status==400)
+                if (response.status==405)
                 {
                     $('#error_list').html(" ");
                     $('#error_list').removeClass('d-none');
@@ -157,52 +158,39 @@
                 } 
                 else if (response.status==200)
                 {
-                    alertify.set('notifier','position', 'top-right');
-                    alertify.success(response.message);
-                    inactiverentalhousestable.ajax.reload();
-                    $('#rentalhouseid').val('');
-                    $('.edit_title').html('');
-                    $('#rental_title').val('');
-                    $('#rental_slug').val('');
-                    $('#monthly_rent').val('');
-
-                    $("#rental_details_ck").children("textarea").remove();
-                    $('.hsedetailstextarea').val('');
-
-                    $('#totalrooms').val('');
-                    $('#rental_address').val('');
+                    $('.guardian-phone').val('');
+                    $('.guardian-name').val('');
                     
-                    $('.rentalhsevideo').val('');
+                    var index = $('#grad-id').get(0).selectedIndex;
+                    $('#grad-id option:eq(' + index + ')').remove();
 
-                    $(".rentalselectcat").val('');
+                    $('#year_joined_picker').val('');
+                    $('.reg-number').val('');
+                    $('.pupil-name').val('');
 
-                    $(".rentalhsevacancy").val('');
-
-                    $(".rentalhselocation").val('');
-
-                    //pass array object value to select2
-                    $('.rentaltagselect2').val('');
-
-                    // preview an image that was previously uploaded
-                    var deleteimage=$('#showimage').removeAttr('src');
-                    $('.rentalhseimage').html('deleteimage');
-
-                    // $('.editcheckbox').prop('checked', false);
-
-                    $('input[name^="edit_is_featured"]').prop('checked', false);
-
-                    $('input[name^="edit_wifi"]').prop('checked', false);
-
-                    $('input[name^="edit_generator"]').prop('checked', false);
-
-                    $('input[name^="edit_balcony"]').prop('checked', false);
-
-                    $('input[name^="edit_parking"]').prop('checked', false);
-
-                    $('input[name^="edit_cctv_cameras"]').prop('checked', false);
-
-                    $('input[name^="edit_servant_quarters"]').prop('checked', false);
-                    $('#editrentalhsedetailsmodal').modal('hide');
+                    swal.fire({
+                        title: response.message,
+                        showClass: {
+                            popup: 'animate__fadeOutDown'
+                        },
+                        hideClass: {
+                            popup: 'animate__fadeOutUpBig'
+                        },
+                        timer:3000
+                    });
+                }
+                else if (response.status==400)
+                {
+                    swal.fire({
+                        title: response.message,
+                        showClass: {
+                            popup: 'animate__fadeOutDown'
+                        },
+                        hideClass: {
+                            popup: 'animate__fadeOutUpBig'
+                        },
+                        timer:3000
+                    });
                 }
                 }
             });

@@ -3,10 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grade;
+use App\Models\Pupil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class Pupil_Controller extends Controller
 {
+    // all pupils page
+    public function all_pupils_page()
+    {
+        return view('admins.admin_all_pupils');
+    }
+
+    // get all pupils to display into datatable
+    public function get_pupils(Request $request)
+    {
+        $allpupils=Pupil::with('pupilgrade')->select('id','pupil_name','pupil_guardian_name','year_joined','grade_id','pupil_guardian_phone','pupil_reg_number');
+        
+        if($request->ajax()){
+            $allpupils = DataTables::of ($allpupils)
+
+            ->addColumn ('grade_id',function(Pupil $pupil){
+                return $pupil->pupilgrade->grade_name;
+            })
+
+            ->addColumn ('action',function($row){
+                return 
+                '
+                    <a href="#" title="edit pupil details" class="btn btn-success editpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-edit"></i></a>
+
+                    <a href="/viewpupilpaymentslip/'.$row->id.'" target="_blank" title="view pupil payment slip"  class="btn btn-primary viewpupilpayment" data-id="'.$row->id.'"><i class="fa-solid fa-dollar"></i></a>
+
+                    <a href="/viewpupilperfomance/'.$row->id.'" target="_blank" title="view pupil performance"  class="btn btn-warning viewpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-eye"></i></a>
+                ';
+            })
+            ->rawColumns(['grade_id','action'])
+            ->make(true);
+
+            return $allpupils;
+        }
+    }
+
     // add new details for a pupil page
     public function create_new_pupil_page()
     {
@@ -20,134 +58,55 @@ class Pupil_Controller extends Controller
     {
         $data=$request->all();
         
-        dd($data);die();
-        
         $rules=[
-            'rental_details'=>'required',
-            'rentalcat_id'=>'required',
-            'location_id'=>'required',
-            'total_rooms'=>'required|numeric|min:1',
-            'landlord_id'=>'required',
-            'rental_address'=>'required'
+            'pupil_name'=>'min:3',
+            'pupil_guardian_phone'=>'digits:10',
+            'pupil_guardian_name'=>'min:3',
+            'year_joined'=>'required'
         ];
 
         $custommessages=[
-            'rental_details.required'=>'Write Merchadise description',
-            'rentalcat_id.required'=>'The Category cant be blank.Select a category',
-            'location_id.required'=>'The Location cant be blank.Select a Location',
-            'total_rooms.required'=>'Kindly write the total rooms for the house',
-            'total_rooms.numeric'=>'The total rooms should be a number',
-            'total_rooms.min:1'=>'The total rooms should greater than 1',
-            'rental_address.required'=>'Enter an address for the House in the Location',
-            'landlord_id.required'=>'The Name Of the Landlord cannot be blank.Select the Landlord'
+            'pupil_name.min:3'=>'The pupil name should greater than 3 letters',
+            'year_joined.required'=>'kindly select the date the pupil joined',
+            'pupil_guardian_name.min:3'=>'The pupil guardian name should greater than 3 letters',
+            'pupil_guardian_phone.digits:10'=>'The phone number should be 10 numbers'
         ];
 
         $validator = Validator::make( $data,$rules,$custommessages );
         
         if($validator->fails())
         {
-            return redirect()->back()->withErrors($validator);
+            return response()->json([
+                'status'=>405,
+                'message'=>$validator->errors()
+            ]);
         }else{
 
-            // show if a house has wifi amenity
-            if(empty($data['wifi'])){
-                $wifi='no';
+            $pupilcount=Pupil::where('pupil_reg_number',$data['pupil_reg_number'])->count();
+            if($pupilcount>0){
+                $message="The Registration is regstered for Another Pupil.Kindly Check the it again.";
+                return response()->json([
+                    'status'=>400,
+                    'message'=>$message
+                ]);
             }else{
-                $wifi='yes';
+
+                $pupil=new Pupil();
+                $pupil->pupil_name=$data['pupil_name'];
+                $pupil->pupil_guardian_name=$data['pupil_guardian_name'];
+                $pupil->pupil_guardian_phone=$data['pupil_guardian_phone'];
+                $pupil->pupil_reg_number=$data['pupil_reg_number'];
+                $pupil->year_joined=$data['year_joined'];
+                $pupil->grade_id=$data['grad_id'];
+                $pupil->save();
+
+                $message="Pupil data registered Successfully";
+
+                return response()->json([
+                    'status'=>200,
+                    'message'=>$message
+                ]);
             }
-
-            // show if a house has wifi amenity
-            if(empty($data['wifi'])){
-                $wifi='no';
-            }else{
-                $wifi='yes';
-            }
-
-            // show if a house has generator amenity
-            if(empty($data['generator'])){
-                $generator='no';
-            }else{
-                $generator='yes';
-            }
-
-            // show if a house has balcony amenity
-            if(empty($data['balcony'])){
-                $balcony='no';
-            }else{
-                $balcony='yes';
-            }
-
-            // show if a house has parking amenity
-            if(empty($data['parking'])){
-                $parking='no';
-            }else{
-                $parking='yes';
-            }
-
-            // show if a house has cctv_cameras amenity
-            if(empty($data['cctv_cameras'])){
-                $cctv_cameras='no';
-            }else{
-                $cctv_cameras='yes';
-            }
-
-            // show if a house has servant_quarters amenity
-            if(empty($data['servant_quarters'])){
-                $servant_quarters='no';
-            }else{
-                $servant_quarters='yes';
-            }
-
-            // show if a house is featured
-            if(empty($data['is_featured'])){
-                $is_featured='no';
-            }else{
-                $is_featured='yes';
-            }
-
-            if($request->hasFile('rental_image')){
-                $imagetmp=$request->file('rental_image');
-                if($imagetmp->isValid()){
-                    $extension=$imagetmp->getClientOriginalExtension();
-                    $image_name=$request->get('rental_name').'-'.rand(111,9999).'.'.$extension;
-
-                    $large_image_path='imagesforthewebsite/rentalhouses/rentalimages/large/'.$image_name;
-                    $medium_image_path='imagesforthewebsite/rentalhouses/rentalimages/medium/'.$image_name;
-                    $small_image_path='imagesforthewebsite/rentalhouses/rentalimages/small/'.$image_name;
-
-                    Image::make($imagetmp)->resize(1040,1200)->save($large_image_path);
-                    Image::make($imagetmp)->resize(520,600)->save($medium_image_path);
-                    Image::make($imagetmp)->resize(260,300)->save($small_image_path);
-
-                }
-            }
-
-            $rental_house=new Rental_house();
-            $rental_house->rental_name=$data['rental_name'];
-            $rental_house->rental_slug=$data['rental_slug'];
-            $rental_house->monthly_rent=$data['monthly_rent'];
-            $rental_house->rental_address=$data['rental_address'];
-            $rental_house->rental_image=$image_name;
-            // $rental_house->rental_video=$video_name;
-            $rental_house->rental_details=$data['rental_details'];
-            $rental_house->rentalcat_id=$data['rentalcat_id'];
-            $rental_house->landlord_id=$data['landlord_id'];
-            $rental_house->location_id=$data['location_id'];
-            $rental_house->total_rooms=$data['total_rooms'];
-            $rental_house->is_featured=$is_featured;
-            $rental_house->wifi=$wifi;
-            $rental_house->generator=$generator;
-            $rental_house->balcony=$balcony;
-            $rental_house->parking=$parking;
-            $rental_house->cctv_cameras=$cctv_cameras;
-            $rental_house->servant_quarters=$servant_quarters;
-            $rental_house->rental_status=0;
-            $rental_house->total_rooms=$data['total_rooms'];
-            $rental_house->save();
-
-            $rental_house->housetags()->attach(request('rentaltags'));
-
-            return redirect()->route('inactiverentalhses')->with('success','The Rental House has been added successfuly.');
         }
     }
 

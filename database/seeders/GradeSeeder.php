@@ -25,5 +25,6 @@ class GradeSeeder extends Seeder
         Grade::create(['grade_name'=>'Grade 10','grade_level'=>'Senior Secondary']);
         Grade::create(['grade_name'=>'Grade 11','grade_level'=>'Senior Secondary']);
         Grade::create(['grade_name'=>'Grade 12','grade_level'=>'Senior Secondary']);
+        Grade::create(['grade_name'=>'null','grade_level'=>'null']);
     }
 }

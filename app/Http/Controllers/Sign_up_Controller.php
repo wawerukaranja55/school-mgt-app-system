@@ -51,12 +51,11 @@ class Sign_up_Controller extends Controller
                 $user=new User;
                 $user->name=$data['full_name'];
                 $user->email=$data['email_address'];
-                // $user->phone=$data['phone_number'];
+                $user->role_id='3';
+                $user->grade_id='13';
                 $user->password=bcrypt($data['password']);
                 $user->save();
-
-                $user->roles()->attach(3);
-
+                
                 $message="Welcome to SKaranja School MNGTMNT SYSTEM.Your Account will be Activated in a short while and you will be able to login.";
 
                 return response()->json([

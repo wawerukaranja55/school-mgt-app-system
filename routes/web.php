@@ -2,10 +2,10 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Sign_up_Controller;
 use App\Http\Controllers\Admin_Controller;
 use App\Http\Controllers\Pupil_Controller;
+use App\Http\Controllers\Teachers_Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +46,14 @@ Route::group(['prefix'=>'admin','middleware'=>(['auth'])],function(){
 
     Route::get('/all_pupils', [Pupil_Controller::class, 'all_pupils_page'])->name('admin.pupils.page');
 
-    
+    Route::get('/get_all_pupils', [Pupil_Controller::class, 'get_pupils'])->name('admin.get_all_pupils');
+
+    Route::get('/all_teachers', [Teachers_Controller::class, 'all_teachers_page'])->name('admin.teachers.page');
+
+    Route::get('/get_all_teachers', [Teachers_Controller::class, 'get_teachers'])->name('admin.get_all_teachers');
+
+    Route::get('get-teacher-class/{id}',[Teachers_Controller::class,'get_teacher_class'])->name('admin.get_teacher_class');
+
+    Route::post('assign-teacher-class/{id}',[Teachers_Controller::class,'assign_class'])->name('admin.assign-class');
 });
 

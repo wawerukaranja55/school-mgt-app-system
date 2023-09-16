@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Grade;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -16,17 +17,18 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminrole=Role::where(['role_name'=>'Admin'])->first();
+        // $adminrole=Role::where(['role_name'=>'Admin'])->first();
+        // $admingrade=Grade::where(['grade_name'=>'null'])->first();
 
-        $admin=User::create([
+        User::create([
             'name'=>'admin',
             'is_approved'=>'1',
+            'role_id'=>'1',
+            'grade_id'=>'13',
             'email'=>'admin@example.com',
             'email_verified_at'=>now(),
             'password'=>Hash::make('admin'),
             'remember_token'=>Str::random(10)
         ]);
-
-        $admin->roles()->attach($adminrole);
     }
 }
