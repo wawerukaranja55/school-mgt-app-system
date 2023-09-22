@@ -32,6 +32,9 @@
     {{-- bootstrap toggle --}}
     <link rel="stylesheet" href="{{ asset('assets/bootstrap-togglemin/bootstrap-toggle.css') }}"/>
 
+    {{-- bootstrap icon --}}
+    <link rel="stylesheet" href="{{ asset('assets/font_bootstrap-icons/bootstrap-icons_1.11.1_font_bootstrap-icons.min.css') }}"/>
+
     {{-- css for datatables --}}
     <link rel="stylesheet" href="{{ asset('assets/datatables/DataTables-1.10.25/css/jquery.dataTables.min.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/datatables/FixedHeader-3.1.9/css/fixedHeader.bootstrap.min.css') }}"/>
@@ -45,6 +48,13 @@
     </style>
 
     @yield('adminallteacherspagestyles')
+
+    @yield('adminaddsubjectpagestyles')
+
+    @yield('adminallsubjectsspagestyles')
+
+    @yield('adminaddexamresultspagestyles')
+    
 </head>
 
 <body>
@@ -291,22 +301,59 @@
                                         </span></a></li>
                             </ul>
                         </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark"
+                            href="javascript:void(0)" aria-expanded="false">
+                            <i class="fa-solid fa-book-open m-2" style="color: #ffffff; font-size:20px;"></i>
+                            <span
+                                class="hide-menu">Subjects Management</span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{{ route('admin.subjects.page') }}" class="sidebar-link"><span class="hide-menu"> All Subjects for the Grades
+                                        </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('admin.create.subject.page') }}" class="sidebar-link"><span class="hide-menu"> Add a Subect for each Grade
+                                        </span></a></li>
+                            </ul>
+                        </li>
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
                             href="grid.html" aria-expanded="false">
                             <i class="fa-solid fa-landmark m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
                                 class="hide-menu">Grades</span></a></li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
-                            href="grid.html" aria-expanded="false">
+                        {{-- <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                            href="{{ route('admin.create.subject.page') }}" aria-expanded="false">
                             <i class="fa-solid fa-book-open m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
-                                class="hide-menu">Subjects</span></a></li>
+                                class="hide-menu">Subjects</span></a></li> --}}
                         <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
                             href="{{ route('admin.teachers.page') }}" aria-expanded="false">
                             <i class="fa-solid fa-chalkboard-user m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
                                 class="hide-menu">Manage Teachers</span></a></li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark"
+                            href="javascript:void(0)" aria-expanded="false">
+                            <i class="fa-solid fa-file-medical m-2" style="color: #ffffff; font-size:20px;"></i>
+                            <span
+                                class="hide-menu">Exams Management</span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{{ route('admin.exams.page') }}" class="sidebar-link"><span class="hide-menu"> All Exams Pupils
+                                        </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('admin.create.exam.page') }}" class="sidebar-link"><span class="hide-menu"> Add a Exam
+                                        </span></a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark"
+                            href="javascript:void(0)" aria-expanded="false">
+                            <i class="fa-solid fa-square-poll-vertical m-2" style="color: #ffffff; font-size:20px;">
+                            </i> 
+                            <span
+                                class="hide-menu">Exams Results Management</span></a>
+                            <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{{ route('admin.results.page') }}" class="sidebar-link"><span class="hide-menu"> All Exam Results
+                                        </span></a></li>
+                                <li class="sidebar-item"><a href="{{ route('admin.create.exams.page') }}" class="sidebar-link"><span class="hide-menu"> Add an Exam Results
+                                        </span></a></li>
+                            </ul>
+                        </li>
+                        {{-- <li class="sidebar-item">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link"
                             href="#" aria-expanded="false">
                             <i class="fa-solid fa-square-poll-vertical m-2" style="color: #ffffff; font-size:20px;"></i>
@@ -316,7 +363,7 @@
                             href="grid.html" aria-expanded="false">
                             <i class="fa-solid fa-sack-dollar m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
-                                class="hide-menu">School Fees Payments</span></a></li>
+                                class="hide-menu">School Fees Payments</span></a></li> --}}
                         
                     </ul>
                 </nav>
@@ -389,7 +436,69 @@
              </div> 
            </div>
         </div>
-     </div>
+    </div>
+
+    {{-- modal to assign role to an admin--}}
+    <div class="modal fade" id="editpupilresultsmodal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body" style="
+              box-shadow: 2px 2px 4px #000000">
+                 <form id="editpupilresultsform" method="POST" action="javascript:void(0);">
+                    @csrf
+                    <div class="modal-body">
+                        <h4>Edit a Pupil Exam Results</h4>
+                        <input type="number" name="class_id" id="edit_class_id">
+                        <input type="number" name="exam_id" id="edit_exam_id">
+                        <div class="card padding-card product-card">
+                            <div class="card-body">
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Mathematics<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_maths" name="maths">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>English<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_eng" name="eng">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Kiswahili<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark"  id="edit_kiswa" name="kiswa">
+                                    </div>
+                                </div>
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Science<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_sci" name="science">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Home Science<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_homesci" name="home_sci">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Social Studies<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_socialstud" name="social_stud">
+                                    </div>
+                                </div>
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-12">
+                                        <label>CRE<span class="text-danger inputrequired">*</span></label>
+                                        <input type="number" class="form-control text-white bg-dark" id="edit_cre" name="cre">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger waves-effect update_pupil_results">Update</button>
+                    </div>
+                 </form>
+             </div> 
+           </div>
+        </div>
+    </div>
+
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
@@ -446,6 +555,10 @@
     @yield('adminallpupilsscript')
 
     @yield('adminallteachersscript')
+    
+    @yield('adminaddexamscript')
+
+    @yield('adminfindclassscript')
     
     @section('scripts')
       <script>

@@ -16,4 +16,9 @@ class Pupil extends Model
     function pupilgrade(){
         return $this->belongsTo('App\Models\Grade','grade_id','id');
     }
+
+    public function pupilresults()
+    {
+        return $this->hasMany(Exam_Result::class, 'student_id');
+    }
 }

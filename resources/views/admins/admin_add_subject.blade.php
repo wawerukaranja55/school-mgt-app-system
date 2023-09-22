@@ -1,6 +1,26 @@
 @extends('admins.admin_layout')
-@section('title','Add Pupil Details ')
+@section('title','Add a Subject with Classes')
 @section('content')
+
+@section('adminaddsubjectpagestyles')
+    <style>
+        .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #fffefe;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #1d1c22;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+    </style>
+@stop
+
 
     <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
@@ -8,12 +28,12 @@
             <div class="page-breadcrumb">
                 <div class="row">
                     <div class="col-12 d-flex no-block align-items-center">
-                        <h4 class="page-title">Pupil Details</h4>
+                        <h4 class="page-title">Subject Details</h4>
                         <div class="ms-auto text-end">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Add pupil details</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Add Subject details</li>
                                 </ol>
                             </nav>
                         </div>
@@ -41,59 +61,44 @@
                 <div class="row">    
                     <div class="col-lg-10 col-md-10 mx-auto">
                         <div class="panel-heading mt-5" style="text-align: center; font-size:18px;"> 
-                            <h3 class="mb-2 panel-title">Add a Pupil Details</h3>
+                            <h3 class="mb-2 panel-title">Add a Subject Details</h3>
                         </div>
-                        <form method="POST" action="javascript:void(0);" id="add-new-pupil-form" class="form-horizontal" role="form" style="margin-bottom: 100px;">
+                        <form method="POST" action="javascript:void(0);" id="add-new-subject-form" class="form-horizontal" role="form" style="margin-bottom: 100px;">
                             @csrf
                             <div class="card padding-card product-card">
                                 <div class="card-body">
                                     <div class="row section-groups">
                                         <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Name<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark pupil-name" required name="pupil_name" placeholder="Write The pupil official Name">
+                                            <label>Subject Name<span class="text-danger inputrequired">*</span></label>
+                                            <input type="text" class="form-control text-white bg-dark subject-name" required name="subject_name" placeholder="Write The Subject official Name">
                                         </div>
                 
                                         <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Registration number<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark reg-number" required name="pupil_reg_number" placeholder="Write The Pupil Regstration Number">
-                                        </div>
-                                    </div>
-
-                                    <div class="row section-groups">
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Year Joined<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required readonly id="year_joined_picker" name="year_joined" placeholder="Select the year pupil was admitted">
-                                            <span class="date-icon"><i class="fa-solid fa-calendar"></i></span>
-                                        </div>
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Grade(class)<span class="text-danger inputrequired">*</span></label><br>
-                                            <select name="grad_id" id="grad-id" class="adminselect2 form-control text-white bg-dark" style="width: 100%;" required>
-                                                <option value=" " disabled selected>Choose a Grade</option>
-                                                @foreach($all_grades as $grade)
-                                                    <option value="{{ $grade['id'] }}"
-                                                        @if (!empty (@old('grade_id')) && $grade->id==@old('grade_id'))
-                                                            selected=""    
-                                                        @endif>{{ $grade->grade_name }}</option>
+                                            <label>Subject Teacher<span class="text-danger inputrequired">*</span></label>
+                                            <select name="teacher_id" id="teacher-id" class="adminselect2 form-control" style="width: 100%;" required>
+                                                <option value=" " disabled selected>Choose a Teacher</option>
+                                                @foreach($all_teachers as $teacher)
+                                                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
 
                                     <div class="row section-groups">
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Guardian/Parent Name<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark guardian-name" required name="pupil_guardian_name" placeholder="Write The pupil Guardian Name">
-                                        </div>
-                
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Pupil Guardian Phone Number<span class="text-danger inputrequired">*</span></label>
-                                            <input type="number" class="form-control text-white bg-dark guardian-phone" required name="pupil_guardian_phone" placeholder="Write The pupil Guardian Phone Number">
+                                        <div class="form-group inputdetails col-sm-12">
+                                            <label>Classes for the Subject<span class="text-danger inputrequired">*</span></label>
+                                            <select name="grades[]" id="grades-id" class="form-control adminselect2" required multiple style="width: 100%;" >
+                                                <option value=" " disabled selected>Select Grade/s</option>
+                                                @foreach($gradesarray as $grade)
+                                                    <option value="{{ $grade->id }}">{{ $grade->grade_name }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <ul class="alert alert-warning d-none error_list"></ul>
+                            <ul class="alert alert-warning d-none" id="error_subject_list"></ul>
                             <div style="display: flex;justify-content:space-around;">
                                 <button type="submit" class="btn btn-success" style="width:60%;text-align:center;">SUBMIT</button>
                             </div>
@@ -109,34 +114,13 @@
 
 @section('adminaddpupilscript')
     <script>
-
-        $(function() {
-            $('#year_joined_picker').datepicker({
-                dateFormat: 'dd.mm.yy',
-                // minDate: 0,
-                calendarWeeks: true,
-                autoclose: true,
-                todayHighlight: true,
-                rtl: true,
-                orientation: "auto",
-                changeMonth: true,
-                changeYear: true,
-            });
-            
-            $('.date-icon').on('click', function() {
-                $('#year_joined_picker').focus();
-            })
-        });
-
-
-        $(document).on('submit','#add-new-pupil-form',function()
+        $(document).on('submit','#add-new-subject-form',function()
         {
-            var url = '{{ route("admin.store.pupil") }}';
+            var url = '{{ route("admin.store.subject") }}';
 
-            console.log(url);
-            $('.error_list').html(" ");
-            var form = $('#add-new-pupil-form')[0];
+            var form = $('#add-new-subject-form')[0];
             var formdata=new FormData(form);
+            $('#error_subject_list').html(" ");
             $.ajax({
                 url:url,
                 method:'POST',
@@ -148,25 +132,22 @@
                 console.log(response);
                 if (response.status==405)
                 {
-                    $('.error_list').html(" ");
-                    $('.error_list').removeClass('d-none');
+                    $('error_subject_list').removeClass('d-none');
                     $.each(response.message,function(key,err_value)
                     {
-                        $('.error_list').append('<li>' + err_value + '</li>');
+                        $('error_subject_list').append('<li>' + err_value + '</li>');
                     })
                 } 
                 else if (response.status==200)
                 {
-                    $('.guardian-phone').val('');
+                    $('.subject-name').val('');
                     $('.guardian-name').val('');
                     
-                    // var index = $('#grad-id').get(0).selectedIndex;
-                    // $('#grad-id option:eq(' + index + ')').remove();
+                    var index = $('#teacher-id').get(0).selectedIndex;
+                    $('#teacher-id option:eq(' + index + ')').remove();
 
-                    $('#year_joined_picker').val('');
-                    $('.reg-number').val('');
-                    $('.pupil-name').val('');
-
+                    var index2 = $('#grades-id').get(0).selectedIndex;
+                    $('#grades-id option:eq(' + index2 + ')').remove();
                     swal.fire({
                         title: response.message,
                         showClass: {
