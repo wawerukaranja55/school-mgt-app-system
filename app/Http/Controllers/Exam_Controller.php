@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\Term;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 
 class Exam_Controller extends Controller
@@ -17,7 +19,8 @@ class Exam_Controller extends Controller
     // add new details for a pupil page
     public function create_new_exam_page()
     {
-        return view('admins.admin_add_exam');
+        $allterms=Term::get();
+        return view('admins.admin_add_exam',compact('allterms'));
     }
 
     //store subject details 
@@ -26,11 +29,12 @@ class Exam_Controller extends Controller
         $data=$request->all();
         
         $rules=[
-            'year'=>'max:4'
+            'year'=>'digits:4|numeric'
         ];
 
         $custommessages=[
-            'year.max:4'=>'The year should have a maximum of 4 digits'
+            'year.digits:4'=>'The year should have a maximum of 4 digits',
+            'year.numeric'=>'The year should be numbers only'
         ];
 
         $validator = Validator::make( $data,$rules,$custommessages );
@@ -43,27 +47,47 @@ class Exam_Controller extends Controller
             ]);
         }else{
 
-            $examcount=Exam::where('exam_name',$data['exam_name'])->count();
-            if($examcount>0){
-                $message="The Exam name already exists.Kindly Check the it again.";
-                return response()->json([
-                    'status'=>400,
-                    'message'=>$message
+            if($request->edit_exam_id)
+            {
+                
+                $exam_detail=Exam::find($request->edit_exam_id);
+
+                $exam_detail->update([
+                    $exam_detail->exam_name=$data['exam_name'],
+                    $exam_detail->term=$data['exam_term'],
+                    $exam_detail->year=$data['exam_year']
                 ]);
-            }else{
-
-                $exam=new Exam();
-                $exam->exam_name=$data['exam_name'];
-                $exam->term=$data['term'];
-                $exam->year=$data['year'];
-                $exam->save();
-
-                $message="Exam registered Successfully,now the results.";
+                
+                $message="Exam details Updated Successfully";
 
                 return response()->json([
                     'status'=>200,
                     'message'=>$message
                 ]);
+            }else{
+
+                $examcount=Exam::where('exam_name',$data['exam_name'])->count();
+                if($examcount>0){
+                    $message="The Exam name already exists.Kindly Check the it again.";
+                    return response()->json([
+                        'status'=>400,
+                        'message'=>$message
+                    ]);
+                }else{
+
+                    $exam=new Exam();
+                    $exam->exam_name=$data['exam_name'];
+                    $exam->term=$data['term'];
+                    $exam->year=$data['year'];
+                    $exam->save();
+
+                    $message="Exam registered Successfully,now the results.";
+
+                    return response()->json([
+                        'status'=>200,
+                        'message'=>$message
+                    ]);
+                }
             }
         }
     }
@@ -71,29 +95,37 @@ class Exam_Controller extends Controller
     // get all subject to display into datatable
     public function all_exams(Request $request)
     {
-        $allsubjects=Subject::with('subjectgrades')->select('id','subject_name','subject_teacher_id');
+        $allexams=Exam::get();
         
         if($request->ajax()){
-            $allsubjects = DataTables::of ($allsubjects)
-
-            ->addColumn ('subject_teacher_id',function(Subject $subject){
-                return $subject->subjectteachers->name;
-            })
-
+            $allexams = DataTables::of ($allexams)
             ->addColumn ('action',function($row){
                 return 
                 '
-                    <a href="#" title="edit pupil details" class="btn btn-success editpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-edit"></i></a>
-
-                    <a href="/viewsubjectdetails/'.$row->id.'" target="_blank" title="view subject details"  class="btn btn-primary viewpupilpayment" data-id="'.$row->id.'"><i class="fa-solid fa-eye"></i></a>
-
-                    <a href="/viewpupilperfomance/'.$row->id.'" target="_blank" title="delete subject details"  class="btn btn-danger viewpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-trash"></i></a>
+                    <a href="#" title="edit exam details" class="btn btn-success editexamdetails" data-id="'.$row->id.'"><i class="fa-solid fa-edit"></i></a>
                 ';
             })
-            ->rawColumns(['subject_teacher_id','action'])
+            ->rawColumns(['action'])
             ->make(true);
 
-            return $allsubjects;
+            return $allexams;
+        }
+    }
+
+    public function exam($id)
+    {
+        $exam=Exam::find($id);
+        if($exam)
+        {
+            return response()->json([
+                'status'=>200,
+                'exam'=>$exam,
+            ]);
+        } else {
+            return response()->json([
+                'status'=>404,
+                'message'=>'Details Not Found'
+            ]);
         }
     }
 }

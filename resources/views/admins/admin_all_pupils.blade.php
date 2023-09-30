@@ -45,6 +45,7 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-12 mx-auto">
+                                <ul class="alert alert-warning d-none error_list"></ul>
                                <table id="allpupilstable" class="table table-striped table-bordered" style="width:100%; margin-top:50px;">
                                   <thead>
                                     <tr>              
@@ -74,22 +75,126 @@
 @section('adminallpupilsscript')
     <script>
         // show activated houses of the house in a datatable
-      var allpupilstable = $('#allpupilstable').DataTable({
-         processing:true,
-         serverside:true,
-         responsive:true,
+        var allpupilstable = $('#allpupilstable').DataTable({
+            processing:true,
+            serverside:true,
+            responsive:true,
 
-         ajax:"{{ route('admin.get_all_pupils') }}",
-         columns: [           
-            { data: 'id' },
-            { data: 'pupil_name' },
-            { data: 'pupil_guardian_name' },
-            {data: 'grade_id', name:'grade_id.pupilgrade', orderable:true,searchable:true},
-            { data: 'year_joined' },
-            { data: 'pupil_guardian_phone'},
-            { data: 'pupil_reg_number'},
-            { data: 'action',name:'action',orderable:false,searchable:false },
-         ],
-      });
+            ajax:"{{ route('admin.get_all_pupils') }}",
+            columns: [           
+                { data: 'id' },
+                { data: 'pupil_name' },
+                { data: 'pupil_guardian_name' },
+                {  data: 'grade_id', name:'grade_id.pupilgrade', orderable:true,searchable:true},
+                { data: 'year_joined' },
+                { data: 'pupil_guardian_phone'},
+                { data: 'pupil_reg_number'},
+                { data: 'action',name:'action',orderable:false,searchable:false },
+            ],
+        });
+
+        //   show editing modal
+        $(document).on('click','.editpupildetails',function(){
+
+            var pupildetailsid=$(this).data('id');
+
+            $('#editpupildetailsmodal').modal('toggle');
+
+            $.ajax({
+            url:'{{ url("admin/get_pupil_details",'') }}' + '/' + pupildetailsid + '/edit',
+            method:'GET',
+            processData: false,
+            contentType: false,
+            success:function(response)
+            {
+                console.log(response)
+                if (response.status==404)
+                {
+                    alert(response.message);
+                } 
+                else if(response.status==200)
+                {
+                    $('#edit-pupil-id').val(response.editpupildetails.id);
+                    $('#edit_pupil_name').val(response.editpupildetails.pupil_name);
+                    $('#edit_reg_number').val(response.editpupildetails.pupil_reg_number);
+                    $('#edit_phone_number').val(response.editpupildetails.pupil_guardian_phone);
+                    $('#edit_pupil_parent').val(response.editpupildetails.pupil_guardian_name);
+                    $('#edit_year_joined').val(response.editpupildetails.year_joined);
+                    $('#edit_pupil_class').val(response.editpupildetails.grade_id);
+                }
+            }
+            })
+        });
+
+        $(document).on('submit','#editpupildetailsform',function()
+        {
+            var url = '{{ route("admin.store.pupil") }}';
+
+            console.log(url);
+
+            $('.error_list').html(" ");
+            var form = $('#editpupildetailsform')[0];
+            var formdata=new FormData(form);
+
+            $.ajax({
+                url:url,
+                method:'POST',
+                processData:false,
+                contentType:false,
+                data:formdata,
+                success:function(response)
+                {
+                console.log(response);
+                if (response.status==405)
+                {
+                    $('.error_list').html(" ");
+                    $('.error_list').removeClass('d-none');
+                    $.each(response.message,function(key,err_value)
+                    {
+                        $('.error_list').append('<li>' + err_value + '</li>');
+                    })
+                } 
+                else if (response.status==200)
+                {
+                    $('#edit_pupil_id').val('');
+                    $('#edit_pupil_name').val('');
+                    $('#edit_reg_number').val('');
+                    $('#edit_phone_number').val('');
+                    $('#edit_pupil_parent').val('');
+                    $('#edit_year_joined').val('');
+                    $('#edit_pupil_class').val('');
+
+                    $('#editpupildetailsmodal').modal('hide');
+
+                    allpupilstable.ajax.reload( null, false );
+
+                    swal.fire({
+                        title: response.message,
+                        showClass: {
+                            popup: 'animate__fadeOutDown'
+                        },
+                        hideClass: {
+                            popup: 'animate__fadeOutUpBig'
+                        },
+                        timer:3000
+                    });
+                }
+                else if (response.status==400)
+                {
+                    swal.fire({
+                        title: response.message,
+                        showClass: {
+                            popup: 'animate__fadeOutDown'
+                        },
+                        hideClass: {
+                            popup: 'animate__fadeOutUpBig'
+                        },
+                        timer:3000
+                    });
+                }
+                }
+            });
+        });
+
     </script>
 @stop

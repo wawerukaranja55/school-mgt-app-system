@@ -9,8 +9,9 @@ use App\Http\Controllers\Pupil_Controller;
 use App\Http\Controllers\Sign_up_Controller;
 use App\Http\Controllers\Subject_Controller;
 use App\Http\Controllers\Teachers_Controller;
-use App\Http\Controllers\Manage_Documents_Controller;
 use App\Http\Controllers\Exam_Results_Controller;
+use App\Http\Controllers\Manage_Documents_Controller;
+use App\Http\Controllers\StudentPerfomanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,8 @@ Route::post('/forgot_password',[Sign_up_Controller::class,'user_forgot_password'
 Route::group(['prefix'=>'admin','middleware'=>(['auth'])],function(){
     Route::get('/dashboard', [Admin_Controller::class, 'admin_dashboard'])->name('admin.dashboard');
 
+    //manage pupils
+
     Route::get('/add_pupil', [Pupil_Controller::class, 'create_new_pupil_page'])->name('admin.create.pupil.page');
 
     Route::post('/store_pupil', [Pupil_Controller::class, 'create_new_pupil'])->name('admin.store.pupil');
@@ -53,6 +56,13 @@ Route::group(['prefix'=>'admin','middleware'=>(['auth'])],function(){
 
     Route::get('/get_all_pupils', [Pupil_Controller::class, 'get_pupils'])->name('admin.get_all_pupils');
 
+    Route::get('get_pupil_details/{id}/edit',[Pupil_Controller::class,'get_pupil_details'])->name('admin.get_pupil_details');
+
+    Route::get('get_pupil_grade/{id}',[Pupil_Controller::class,'get_pupil_grade'])->name('admin.get_pupil_grade');
+
+    Route::post('/graduate_pupil', [Pupil_Controller::class, 'graduate_pupil'])->name('admin.graduate.pupil');
+
+    //manage teachers
     Route::get('/all_teachers', [Teachers_Controller::class, 'all_teachers_page'])->name('admin.teachers.page');
 
     Route::get('/get_all_teachers', [Teachers_Controller::class, 'get_teachers'])->name('admin.get_all_teachers');
@@ -79,6 +89,13 @@ Route::group(['prefix'=>'admin','middleware'=>(['auth'])],function(){
 
     Route::get('/get_all_exams', [Exam_Controller::class, 'all_exams'])->name('admin.get_all_exams');
 
+    Route::get('exam/{id}/edit',[Exam_Controller::class,'exam'])->name('admin.get_exam');
+
+    //manage classes
+    Route::get('/all_classes', [Admin_Controller::class, 'all_classes_page'])->name('admin.classes.page');
+
+    Route::get('/get_all_classes', [Admin_Controller::class, 'get_classes'])->name('admin.get_all_classes');
+
     // manage exam results 
     Route::get('/add_exam_results', [Exam_Results_Controller::class, 'create_exams_results_page'])->name('admin.create.exams.page');
 
@@ -95,5 +112,14 @@ Route::group(['prefix'=>'admin','middleware'=>(['auth'])],function(){
     Route::get('download_pupil_results/{id}/{exam_id}', [Manage_Documents_Controller::class,'generate_pupil_results_pdf'])->name('download_pupil_results.pdf');
 
     Route::get('get_pupil_results/{id}/edit', [Exam_Results_Controller::class, 'get_pupil_results'])->name('admin.get_pupil_results');
+
+    // manage pupil perfomance
+    Route::get('/all_pupil_perfomance', [StudentPerfomanceController::class, 'all_pupil_perfomance_page'])->name('admin.get_all_pupil_perfomance_page');
+
+    Route::get('/get_all_pupil_perfomance', [StudentPerfomanceController::class, 'get_pupil_perfomances'])->name('admin.get_all_pupil_perfomance');
+
+    Route::get('view_pupil_perfomance/{id}/{term}/{year}', [StudentPerfomanceController::class,'view_pupil_perfomance'])->name('view_pupil_perfomance.report');
+
+    Route::get('download_pupil_perfomance/{id}/{term}/{year}', [StudentPerfomanceController::class,'generate_pupil_perfomance_pdf'])->name('download_pupil_perfomance.pdf');
 });
 

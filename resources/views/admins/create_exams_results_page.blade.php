@@ -120,10 +120,14 @@
                 <div class="row" style="
                 display: flex;
                 justify-content: center;">
-                    <div class="col-md-12">
-                        <a class="btn btn-dark" href="{{ route('admin.pupils.page') }}">All Pupils in the school</a>
+                    <div class="col-md-4">
+                        <a class="btn btn-dark" href="{{ route('admin.get_all_pupil_perfomance_page') }}">Mean Exam Results by Term</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a class="btn btn-dark" href="{{ route('admin.pupils.page') }}">All Pupils</a>
                     </div>
                 </div>
+
                 <div class="row">    
                     <div class="col-lg-10 col-md-10 mx-auto">
                         <div class="panel-heading mt-5" style="text-align: center; font-size:18px;"> 
@@ -215,6 +219,8 @@
 
             var classid=$('#class_id_results').val();
 
+            $('.error_list').html(" ");
+            
             $.ajax({
                 type:"GET",
                 url:'{{ route("admin.find.class.exam") }}',
@@ -228,11 +234,11 @@
 
                     if (response.status==405)
                     {
-                        $('.results_error_list').html(" ");
-                        $('.results_error_list').removeClass('d-none');
+                        $('.error_list').html(" ");
+                        $('.error_list').removeClass('d-none');
                         $.each(response.message,function(key,err_value)
                         {
-                            $('.results_error_list').append('<li>' + err_value + '</li>');
+                            $('.error_list').append('<li>' + err_value + '</li>');
                         })
                     } 
                     else if (response.status==200)
@@ -276,7 +282,7 @@
 
                         for (let i = 0; i < response.pupilsToAddResults.length; i++) {
                             $('#addresultstbody').append(
-                            '<tr><td data-label="Pupil Name">' + response.pupilsToAddResults[i].pupil_name + '</td><td class="d-none"><form method="POST" id="results-form' + response.pupilsToAddResults[i].id + '" action="javascript:void(0);" class="add-new-exam-results-form">@csrf</form><input name="term" id="pupilresults' + response.pupildetails[i].id + '" value="' + response.examnme[0].term + '" form="results-form' + response.pupildetails[i].id + '"/><input name="pupil_id" id="pupilresults' + response.pupilsToAddResults[i].id + '" value="' + response.pupilsToAddResults[i].id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/><input name="exam_id" id="classexamresultsid' + response.pupilsToAddResults[i].id + '" value="' + response.examnme[0].id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/><input name="class_id" id="classresultsid' + response.pupilsToAddResults[i].id + '" value="' + response.pupilsToAddResults[i].grade_id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/></td><td data-label="Exam Name">' + response.examnme[0].exam_name + '</td><td data-label="Maths"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="maths' + response.pupilsToAddResults[i].id + '" name="maths" placeholder="maths results"></td><td data-label="English"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="eng' + response.pupilsToAddResults[i].id + '" name="eng" placeholder="english results"></td><td data-label="Kiswa"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="kiswa' + response.pupilsToAddResults[i].id + '" name="kiswa" placeholder="kiswahili results"></td><td data-label="Home Sci"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="home_sci' + response.pupilsToAddResults[i].id + '" name="home_sci" placeholder="Home sci results"></td><td data-label="Science"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="sci' + response.pupilsToAddResults[i].id + '" name="science" placeholder="Science results"></td><td data-label="CRE"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="cre' + response.pupilsToAddResults[i].id + '" name="cre" placeholder="CRE results"></td><td data-label="Social Studies"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="social_stud' + response.pupilsToAddResults[i].id + '" name="social_stud" placeholder="social s results"></td><td data-label="Action"><button type="submit" form="results-form' + response.pupilsToAddResults[i].id + '" form-id=' + response.pupilsToAddResults[i].id + ' onclick="storepupilresults(this)" class="btn btn-success" style="text-align:center;" title="Save Results"><i class="fas fa-save" style="color: #ffffff; font-size:20px;"></i></button></td></tr>')    
+                            '<tr id="row' + response.pupilsToAddResults[i].id + '"><td data-label="Pupil Name">' + response.pupilsToAddResults[i].pupil_name + '</td><td class="d-none"><form method="POST" id="results-form' + response.pupilsToAddResults[i].id + '" action="javascript:void(0);" class="add-new-exam-results-form">@csrf</form><input name="term" id="term' + response.pupilsToAddResults[i].id + '" value="' + response.examnme[0].term + '" form="results-form' + response.pupilsToAddResults[i].id + '"/><input name="pupil_id" id="pupilresults' + response.pupilsToAddResults[i].id + '" value="' + response.pupilsToAddResults[i].id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/><input name="exam_id" id="classexamresultsid' + response.pupilsToAddResults[i].id + '" value="' + response.examnme[0].id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/><input name="class_id" id="classresultsid' + response.pupilsToAddResults[i].id + '" value="' + response.pupilsToAddResults[i].grade_id + '" form="results-form' + response.pupilsToAddResults[i].id + '"/></td><td data-label="Exam Name">' + response.examnme[0].exam_name + '</td><td data-label="Maths"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="maths' + response.pupilsToAddResults[i].id + '" name="maths" placeholder="maths results"></td><td data-label="English"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="eng' + response.pupilsToAddResults[i].id + '" name="eng" placeholder="english results"></td><td data-label="Kiswa"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="kiswa' + response.pupilsToAddResults[i].id + '" name="kiswa" placeholder="kiswahili results"></td><td data-label="Home Sci"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="home_sci' + response.pupilsToAddResults[i].id + '" name="home_sci" placeholder="Home sci results"></td><td data-label="Science"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="sci' + response.pupilsToAddResults[i].id + '" name="science" placeholder="Science results"></td><td data-label="CRE"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="cre' + response.pupilsToAddResults[i].id + '" name="cre" placeholder="CRE results"></td><td data-label="Social Studies"><input form="results-form' + response.pupilsToAddResults[i].id + '" class="form-control text-white bg-dark rounded" id="social_stud' + response.pupilsToAddResults[i].id + '" name="social_stud" placeholder="social s results"></td><td data-label="Action"><button type="submit" form="results-form' + response.pupilsToAddResults[i].id + '" form-id=' + response.pupilsToAddResults[i].id + ' onclick="storepupilresults(this)" class="btn btn-success" style="text-align:center;" title="Save Results"><i class="fas fa-save" style="color: #ffffff; font-size:20px;"></i></button></td></tr>')    
                         }
                     }
                     else if (response.status==420)
@@ -301,7 +307,8 @@
 
             var url = '{{ route("admin.store.results") }}';
 
-            $('.error_list').html(" ");
+            $('.results_error_list').html(" ");
+
             var form = $('#results-form'+ id +'')[0];
             var formdata=new FormData(form);
             $.ajax({
@@ -315,11 +322,11 @@
                 console.log(response);
                 if (response.status==405)
                 {
-                    $('.error_list').html(" ");
-                    $('.error_list').removeClass('d-none');
+                    $('.results_error_list').html(" ");
+                    $('.results_error_list').removeClass('d-none');
                     $.each(response.message,function(key,err_value)
                     {
-                        $('.error_list').append('<li>' + err_value + '</li>');
+                        $('.results_error_list').append('<li>' + err_value + '</li>');
                     })
                 } 
                 else if (response.status==200)

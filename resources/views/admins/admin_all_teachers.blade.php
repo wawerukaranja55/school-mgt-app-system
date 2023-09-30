@@ -106,16 +106,6 @@
                   return data;
                }
             },
-            // { data:
-            //     function (row) {
-            //     let teacherclasses= [];
-            //         $(row.classes).each(function (i, e)
-            //         {
-            //             teacherclasses.push(e.grade_name);
-            //         });
-            //         return '<input readonly=" " class="teachergrade bg-dark text-white" style="width: 131px;" value="' + teacherclasses + '" data-id="' + row.id + '"><br><button type="button" value="' + row.id + '" class="btn-primary assigngrade">Assign New Class</button>';
-            //     }, name: 'classes.grade_name'
-            // },
          ],
 
         rowCallback: function ( row, data ) {

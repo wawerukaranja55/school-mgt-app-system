@@ -62,7 +62,7 @@
                                     <div class="row section-groups">
                                         <div class="form-group inputdetails col-sm-6">
                                             <label>Year Joined<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark" required readonly id="year_joined_picker" name="year_joined" placeholder="Select the year pupil was admitted">
+                                            <input type="text" class="form-control text-white bg-dark year_joined_picker" required readonly name="year_joined" placeholder="Select the year pupil was admitted">
                                             <span class="date-icon"><i class="fa-solid fa-calendar"></i></span>
                                         </div>
                                         <div class="form-group inputdetails col-sm-6">
@@ -109,26 +109,6 @@
 
 @section('adminaddpupilscript')
     <script>
-
-        $(function() {
-            $('#year_joined_picker').datepicker({
-                dateFormat: 'dd.mm.yy',
-                // minDate: 0,
-                calendarWeeks: true,
-                autoclose: true,
-                todayHighlight: true,
-                rtl: true,
-                orientation: "auto",
-                changeMonth: true,
-                changeYear: true,
-            });
-            
-            $('.date-icon').on('click', function() {
-                $('#year_joined_picker').focus();
-            })
-        });
-
-
         $(document).on('submit','#add-new-pupil-form',function()
         {
             var url = '{{ route("admin.store.pupil") }}';

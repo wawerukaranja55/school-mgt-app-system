@@ -3,10 +3,13 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
+use Database\Seeders\TermSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GradeSeeder;
 use Database\Seeders\Rolesseeder;
+use Database\Seeders\SubjectsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +21,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             Rolesseeder::class,
             GradeSeeder::class,
-            UserSeeder::class  
+            UserSeeder::class,
+            TermSeeder::class,
+            SubjectsSeeder::class 
         ]);
     }
 }

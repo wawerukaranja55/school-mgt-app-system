@@ -42,10 +42,12 @@
     <link rel="stylesheet" href="{{ asset('assets/datatables/Buttons-1.7.1/css/buttons.bootstrap4.min.css') }}"/>
 
     <style>
-        .modal-lg{
-            max-width: 90% !important;
+        .modal{
+            width: 90% !important;
          }
     </style>
+
+    @yield('admindashboardpagestyles')
 
     @yield('adminallteacherspagestyles')
 
@@ -58,6 +60,9 @@
 </head>
 
 <body>
+    <?php use App\Models\Term; 
+        $allterms=Term::get();
+    ?>
 
     <?php use App\Models\Grade; 
          $allgrades=Grade::get();
@@ -301,29 +306,23 @@
                                         </span></a></li>
                             </ul>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link has-arrow waves-effect waves-dark"
-                            href="javascript:void(0)" aria-expanded="false">
+
+                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                            href="{{ route('admin.subjects.page') }}" aria-expanded="false">
                             <i class="fa-solid fa-book-open m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
-                                class="hide-menu">Subjects Management</span></a>
-                            <ul aria-expanded="false" class="collapse  first-level">
-                                <li class="sidebar-item"><a href="{{ route('admin.subjects.page') }}" class="sidebar-link"><span class="hide-menu"> All Subjects for the Grades
-                                        </span></a></li>
-                                <li class="sidebar-item"><a href="{{ route('admin.create.subject.page') }}" class="sidebar-link"><span class="hide-menu"> Add a Subect for each Grade
-                                        </span></a></li>
-                            </ul>
+                                class="hide-menu">All Subjects for the Grades</span></a>
                         </li>
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
-                            href="grid.html" aria-expanded="false">
+                        
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                            href="{{ route('admin.classes.page') }}" aria-expanded="false">
                             <i class="fa-solid fa-landmark m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
-                                class="hide-menu">Grades</span></a></li>
-                        {{-- <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
-                            href="{{ route('admin.create.subject.page') }}" aria-expanded="false">
-                            <i class="fa-solid fa-book-open m-2" style="color: #ffffff; font-size:20px;"></i>
-                            <span
-                                class="hide-menu">Subjects</span></a></li> --}}
-                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                                class="hide-menu">Classes</span></a></li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link"
                             href="{{ route('admin.teachers.page') }}" aria-expanded="false">
                             <i class="fa-solid fa-chalkboard-user m-2" style="color: #ffffff; font-size:20px;"></i>
                             <span
@@ -347,6 +346,8 @@
                             <span
                                 class="hide-menu">Exams Results Management</span></a>
                             <ul aria-expanded="false" class="collapse  first-level">
+                                <li class="sidebar-item"><a href="{{ route('admin.get_all_pupil_perfomance_page') }}" class="sidebar-link"><span class="hide-menu">Student Exam Results by Term
+                                </span></a></li>
                                 <li class="sidebar-item"><a href="{{ route('admin.results.page') }}" class="sidebar-link"><span class="hide-menu"> All Exam Results
                                         </span></a></li>
                                 <li class="sidebar-item"><a href="{{ route('admin.create.exams.page') }}" class="sidebar-link"><span class="hide-menu"> Add an Exam Results
@@ -429,7 +430,7 @@
                       </div>
                     </div>
                     <div class="modal-footer">
-                       <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
+                       <button type="button" id="closeModal" class="btn btn-default waves-effect" data-bs-dismiss="modal">Close</button>
                        <button type="submit" class="btn btn-danger waves-effect assign_role_toadmin">Update</button>
                     </div>
                  </form>
@@ -448,50 +449,210 @@
                     @csrf
                     <div class="modal-body">
                         <h4>Edit a Pupil Exam Results</h4>
-                        <input type="number" name="class_id" id="edit_class_id">
-                        <input type="number" name="exam_id" id="edit_exam_id">
+                        <input type="hidden" name="results_id" id="edit_results_id">
+                        <input type="hidden" name="class_id" id="edit_class_id">
+                        <input type="hidden" name="exam_id" id="edit_exam_id">
+                        <input type="hidden" name="pupil_id" id="edit_pupil_id">
                         <div class="card padding-card product-card">
                             <div class="card-body">
                                 <div class="row section-groups">
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>Mathematics<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_maths" name="maths">
+                                        <input class="form-control text-white bg-dark" id="edit_maths" name="maths">
                                     </div>
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>English<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_eng" name="eng">
+                                        <input class="form-control text-white bg-dark" id="edit_eng" name="eng">
                                     </div>
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>Kiswahili<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark"  id="edit_kiswa" name="kiswa">
+                                        <input class="form-control text-white bg-dark"  id="edit_kiswa" name="kiswa">
                                     </div>
                                 </div>
                                 <div class="row section-groups">
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>Science<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_sci" name="science">
+                                        <input class="form-control text-white bg-dark" id="edit_sci" name="science">
                                     </div>
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>Home Science<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_homesci" name="home_sci">
+                                        <input class="form-control text-white bg-dark" id="edit_homesci" name="home_sci">
                                     </div>
                                     <div class="form-group inputdetails col-sm-4">
                                         <label>Social Studies<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_socialstud" name="social_stud">
+                                        <input class="form-control text-white bg-dark" id="edit_socialstud" name="social_stud">
                                     </div>
                                 </div>
                                 <div class="row section-groups">
-                                    <div class="form-group inputdetails col-sm-12">
+                                    <div class="form-group inputdetails col-sm-4">
                                         <label>CRE<span class="text-danger inputrequired">*</span></label>
-                                        <input type="number" class="form-control text-white bg-dark" id="edit_cre" name="cre">
+                                        <input class="form-control text-white bg-dark" id="edit_cre" name="cre">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Term<span class="text-danger inputrequired">*</span></label>
+                                        
+                                        <select name="term" id="edit_term" class="form-control text-white bg-dark" style="width:100%;">
+                                            <option disabled selected>Select a Term of the Year </option>
+                                                @foreach($allterms as $term)
+                                                <option value="{{ $term->id }}">
+                                                    {{ $term->term_name }}</option>
+                                                @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-4">
+                                        <label>Year<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark" id="edit_year" name="year">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <ul class="alert alert-warning d-none update_error_list"></ul>
                     <div class="modal-footer">
-                       <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
-                       <button type="submit" class="btn btn-danger waves-effect update_pupil_results">Update</button>
+                       <button type="button" id="closeModal" class="btn btn-default waves-effect" data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger waves-effect">Update</button>
+                    </div>
+                 </form>
+             </div> 
+           </div>
+        </div>
+    </div>
+
+    {{-- modal to assign role to an admin--}}
+    <div class="modal fade" id="editpupildetailsmodal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body" style="
+              box-shadow: 2px 2px 4px #000000">
+                 <form id="editpupildetailsform" method="POST" action="javascript:void(0);">
+                    @csrf
+                    <div class="modal-body">
+                        <h4>Edit a Pupil Details</h4>
+                        <input type="hidden" name="edit_pupil_id" id="edit-pupil-id">
+                        <div class="card padding-card product-card">
+                            <div class="card-body">
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Pupil Name<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark" id="edit_pupil_name" required name="pupil_name">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Pupil Reg Number<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark" id="edit_reg_number" required name="pupil_reg_number">
+                                    </div>
+                                </div>
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Parent/Guardian Phone Number<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark" id="edit_phone_number" required name="pupil_guardian_phone">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Parent/Guardian Name<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark" id="edit_pupil_parent" required name="pupil_guardian_name">
+                                    </div>
+                                </div>
+                                <div class="row section-groups">
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Year Joined<span class="text-danger inputrequired">*</span></label>
+                                        <input class="form-control text-white bg-dark year_joined_picker" id="edit_year_joined" required readonly name="year_joined">
+                                    </div>
+                                    <div class="form-group inputdetails col-sm-6">
+                                        <label>Class<span class="text-danger inputrequired">*</span></label>
+                                        
+                                        <select name="grad_id" id="edit_pupil_class" class="form-control text-white bg-dark" style="width:100%;">
+                                            <option disabled selected>Select a Class for the Pupil </option>
+                                                @foreach($allgrades as $grade)
+                                                <option value="{{ $grade->id }}">
+                                                    {{ $grade->grade_name }}</option>
+                                                @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="alert alert-warning d-none update_error_list"></ul>
+                    <div class="modal-footer">
+                       <button type="button" id="closeModal" class="btn btn-default waves-effect" data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger waves-effect">Update</button>
+                    </div>
+                 </form>
+             </div> 
+           </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="graduatenxtgrademodal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body" style="
+              box-shadow: 2px 2px 4px #000000">
+                 <form id="graduatenxtgrade" method="POST" action="javascript:void(0);">
+                    @csrf
+                    <div class="modal-body">
+                       <h4>Graduate Pupil to Next Class</h4>
+                       <input type="hidden" name="edit_pupil_id" id="pupilclass_id">
+                       <input type="hidden" name="pupil_term" id="pupilterm">
+                       <input type="hidden" name="pupil_year" id="pupilyear">
+                       <div class="form-group">
+                          <label style="font-size:15px;">Pupil Name</label>
+                          <input type="text" class="form-control" readonly name="name" id="graduate_pupil_name">
+                      </div>
+                      <div class="form-group">
+                          <label style="font-size:15px;">Grades</label><br>
+                          <select name="pupilgrade" id="pupilgradeid" class="form-control text-white bg-dark" required style="width: 100%;">
+                             <option disabled>Graduate a pupil to next class</option>
+                             @foreach ($allgrades as $grade)
+                                <option value="{{ $grade->id }}">
+                                   {{ $grade->grade_name }}
+                                </option>
+                             @endforeach
+                          </select>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" id="closeModal" class="btn btn-default waves-effect" data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger waves-effect">Update</button>
+                    </div>
+                 </form>
+             </div> 
+           </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editexamdetailsmodal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body" style="
+              box-shadow: 2px 2px 4px #000000">
+                 <form id="editexamdetails" method="POST" action="javascript:void(0);">
+                    @csrf
+                    <div class="modal-body">
+                       <h4>Edit Exam Details</h4>
+                       <input type="hidden" name="edit_exam_id" id="editexamid">
+                       <div class="form-group">
+                          <label style="font-size:15px;">Exam Name</label>
+                          <input type="text" class="form-control" name="exam_name" id="edit_exam_name">
+                      </div>
+                      <div class="form-group">
+                        <label style="font-size:15px;">Year</label>
+                        <input type="text" class="form-control" name="exam_year" id="edit_exam_year">
+                    </div>
+                      <div class="form-group">
+                          <label style="font-size:15px;">Term</label><br>
+                          <select name="exam_term" id="edit_exam_term" class="form-control text-white bg-dark" required style="width: 100%;">
+                             <option disabled>Graduate a pupil to next class</option>
+                             @foreach ($allterms as $term)
+                                <option value="{{ $term->id }}">
+                                   {{ $term->term_name }}
+                                </option>
+                             @endforeach
+                          </select>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" id="closeModal" class="btn btn-default waves-effect" data-bs-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger waves-effect">Update</button>
                     </div>
                  </form>
              </div> 
@@ -549,16 +710,22 @@
     <script type="text/javascript" src="{{ asset('assets/datatables/Buttons-1.7.1/js/buttons.html5.min.js')}}"></script>
     <script type="text/javascript" src="{{ asset('assets/datatables/Buttons-1.7.1/js/buttons.print.min.js')}}"></script>
 
-
     @yield('adminaddpupilscript')
+
+    @yield('adminallgradesscript')
 
     @yield('adminallpupilsscript')
 
     @yield('adminallteachersscript')
     
+    @yield('adminallexamsscript')
+
     @yield('adminaddexamscript')
 
     @yield('adminfindclassscript')
+
+    @yield('adminallsubjectsscript')
+    
     
     @section('scripts')
       <script>
@@ -569,6 +736,24 @@
             $('.adminselect2').select2();
 
          });
+
+         $(function() {
+                $('.year_joined_picker').datepicker({
+                    dateFormat: 'dd.mm.yy',
+                    // minDate: 0,
+                    calendarWeeks: true,
+                    autoclose: true,
+                    todayHighlight: true,
+                    rtl: true,
+                    orientation: "auto",
+                    changeMonth: true,
+                    changeYear: true,
+                });
+                
+                $('.date-icon').on('click', function() {
+                    $('.year_joined_picker').focus();
+                })
+            });
       </script>
 </body>
 

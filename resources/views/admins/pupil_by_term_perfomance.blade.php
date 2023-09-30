@@ -1,5 +1,5 @@
 @extends('admins.admin_layout')
-@section('title','Exams Results Management')
+@section('title','Pupil by Term Performance')
 @section('content')
 
     <!-- ============================================================== -->
@@ -34,31 +34,30 @@
                 <div class="row" style="
                 display: flex;
                 justify-content: center;">
-                    <div class="col-md-12">
-                        <a class="btn btn-dark" href="{{ route('admin.create.pupil.page') }}">Create a new pupil record</a>
+                    <div class="col-md-4">
+                        <a class="btn btn-dark" href="{{ route('admin.results.page') }}">Exam Results</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a class="btn btn-dark" href="{{ route('admin.pupils.page') }}">All Pupils</a>
                     </div>
                 </div>
                 <div class="row">    
                     <div class="col-lg-12 col-md-10 mx-auto">
                         <div class="panel-heading mt-5" style="text-align: center; font-size:18px;"> 
-                            <h3 class="mb-2 panel-title">All Exam Results</h3>
+                            <h3 class="mb-2 panel-title">Mean Exam Results for Pupil by Term</h3>
                         </div>
                         <div class="row">
                             <div class="col-lg-12 mx-auto">
-                               <table id="allexamresultstable" class="table table-striped table-bordered" style="width:100%; margin-top:50px;">
+                                <ul class="alert alert-warning d-none error_list"></ul>
+                               <table id="pupilPerfomanceByTermTable" class="table table-striped table-bordered" style="width:100%; margin-top:50px;">
                                   <thead>
                                     <tr>              
                                       <td>id</td>
                                       <td>Pupil Name</td>
-                                      <td>Exam Name</td>
-                                      <td>Class</td>
-                                      <td>Maths</td>
-                                      <td>English</td>
-                                      <td>Kiswahili</td>
-                                      <td>Science</td>
-                                      <td>Home Science</td>
-                                      <td>CRE</td>
-                                      <td>Social studies</td>
+                                      <td>Mean</td>
+                                      <td>Term</td>
+                                      <td>Year</td>
+                                      <td>Graduate Next Class</td>
                                       <td>Action</td>
                                     </tr>
                                   </thead>
@@ -78,77 +77,83 @@
 @section('adminallpupilsscript')
     <script>
         // show activated houses of the house in a datatable
-      var allpupilstable = $('#allexamresultstable').DataTable({
+      var allpupilstable = $('#pupilPerfomanceByTermTable').DataTable({
          processing:true,
          serverside:true,
          responsive:true,
 
-         ajax:"{{ route('admin.get_all_exam_results') }}",
+         ajax:"{{ route('admin.get_all_pupil_perfomance') }}",
          columns: [           
-            { data: 'id' },
-            { data: 'student_id',name:'student_id.pupilname', orderable:true,searchable:true},
-            { data: 'exam_id',name:'exam_id.pupilexam', orderable:true,searchable:true},
-            { data: 'class_id', name:'class_id.studentgrade', orderable:true,searchable:true},
-            { data: 'maths' },
-            { data: 'eng'},
-            { data: 'kiswa'},
-            { data: 'home_sci' },
-            { data: 'sci'},
-            { data: 'cre'},
-            { data: 'social_stud'},
+            {   data: 'id' },
+            {   data: 'pupil_id',name:'student_id.pupilname', orderable:true,searchable:true},
+            {   data: 'mean' },
+            {   data: 'term' },
+            {   data: 'year'},
+            {   data:
+                function (row) {
+                    let pupilresultsgrades= [];
+                    $(row.pupilresultsgrade).each(function (i, e) {
+                        pupilresultsgrades.push(e.grade_name);
+                    });
+                    return '<input readonly=" " class="showpupilgrade bg-dark text-white" style="width:145px;" value="' + pupilresultsgrades + '" data-id="' + row.id + '"><br><button type="button" data-year="' + row.year + '" data-term="' + row.term + '" value="' + row.id + '" class="graduatenextclass">Graduate Next Class</button>';
+    
+                }, name: 'pupilresultsgrade.grade_name'
+            },
             { data: 'action',name:'action',orderable:false,searchable:false },
          ],
       });
 
-      //   show editing modal
-      $(document).on('click','.editpupilresults',function(){
+        $(document).on('click','.graduatenextclass',function(e){
+            e.preventDefault();
 
-         var pupilresultsid=$(this).data('id');
+            var pupilgradeid=$(this).val();
 
-         $('#editpupilresultsmodal').modal('toggle');
+            var yearid=$(this).data('year');
 
-         $.ajax({
-            url:'{{ url("admin/get_pupil_results",'') }}' + '/' + pupilresultsid + '/edit',
-            method:'GET',
-            processData: false,
-            contentType: false,
-            success:function(response)
-            {
-               console.log(response)
-               if (response.status==404)
-               {
-                  alert(response.message);
-               } 
-               else if(response.status==200)
-               {
-                    $('#edit_pupil_id').val(response.editpupilresults.student_id);
-                    $('#edit_results_id').val(response.editpupilresults.id);
-                    $('#edit_class_id').val(response.editpupilresults.class_id);
-                    $('#edit_exam_id').val(response.editpupilresults.exam_id);
-                    $('#edit_maths').val(response.editpupilresults.maths);
-                    $('#edit_eng').val(response.editpupilresults.eng);
-                    $('#edit_kiswa').val(response.editpupilresults.kiswa);
-                    $('#edit_cre').val(response.editpupilresults.cre);
-                    $('#edit_socialstud').val(response.editpupilresults.social_stud);
-                    $('#edit_sci').val(response.editpupilresults.sci);
-                    $('#edit_homesci').val(response.editpupilresults.home_sci);
-                    $('#edit_term').val(response.termyear[0].term);
-                    $('#edit_year').val(response.termyear[0].year);
-               }
-            }
-         })
-      });
+            var termid=$(this).data('term');
 
-      $(document).on('submit','#editpupilresultsform',function()
+            var url = '{{ route("admin.get_pupil_grade", ":id") }}';
+                    url = url.replace(':id', pupilgradeid);
+            $('#graduatenxtgrademodal').modal('show');
+
+            $.ajax({
+              type:"GET",
+              url:url,
+              processData: false,
+              contentType: false,
+              success:function(response)
+              {
+                console.log(response);
+                if (response.status==404)
+                {
+                    alert(response.message);
+                    $('#graduatenxtgrademodal').modal('hide');
+                } 
+                else
+                {
+                    $('#pupilyear').val(yearid);
+                    $('#pupilterm').val(termid);
+
+                    $('#graduate_pupil_name').val(response.pupil_grade.pupil_name);
+                    $('#pupilclass_id').val(response.pupil_grade.id);
+
+                    var pupilgradesobject = response.pupil_grade.pupilgrade.id;
+                    $('#pupilgradeid').val(pupilgradesobject).trigger('change');
+                              
+                }
+              }
+            })
+        })
+
+        $(document).on('submit','#graduatenxtgrade',function()
         {
-            var url = '{{ route("admin.store.results") }}';
+            var url = '{{ route("admin.graduate.pupil") }}';
 
-            console.log(url);
+            $('.error_list').html(" ");
+            $('.error_list').removeClass('d-none');
 
-            $('.update_error_list').html(" ");
-            var form = $('#editpupilresultsform')[0];
+            var form = $('#graduatenxtgrade')[0];
             var formdata=new FormData(form);
-
             $.ajax({
                 url:url,
                 method:'POST',
@@ -160,32 +165,19 @@
                 console.log(response);
                 if (response.status==405)
                 {
-                    $('.update_error_list').html(" ");
-                    $('.update_error_list').removeClass('d-none');
+                    $('.error_list').html(" ");
+                    $('.error_list').removeClass('d-none');
                     $.each(response.message,function(key,err_value)
                     {
-                        $('.update_error_list').append('<li>' + err_value + '</li>');
+                        $('.error_list').append('<li>' + err_value + '</li>');
                     })
                 } 
                 else if (response.status==200)
                 {
-                    $('#edit_results_id').val('');
-                    $('#edit_class_id').val('');
-                    $('#edit_exam_id').val('');
-                    $('#edit_maths').val('');
-                    $('#edit_eng').val('');
-                    $('#edit_kiswa').val('');
-                    $('#edit_cre').val('');
-                    $('#edit_socialstud').val('');
-                    $('#edit_sci').val('');
-                    $('#edit_homesci').val('');
-                    $('#edit_term').val('');
-                    $('#edit_year').val('');
-
-                    $('#editpupilresultsmodal').modal('hide');
+                    $('#graduate_pupil_name').val('');
+                    $('#pupilgradeid').val('');
 
                     allpupilstable.ajax.reload( null, false );
-
                     swal.fire({
                         title: response.message,
                         showClass: {
@@ -196,6 +188,10 @@
                         },
                         timer:3000
                     });
+
+                    $('#graduatenxtgrademodal').modal('hide');
+
+
                 }
                 else if (response.status==400)
                 {

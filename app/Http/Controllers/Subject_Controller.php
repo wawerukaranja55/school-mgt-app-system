@@ -28,26 +28,10 @@ class Subject_Controller extends Controller
     // get all subject to display into datatable
     public function all_subjects(Request $request)
     {
-        $allsubjects=Subject::with('subjectgrades')->select('id','subject_name','subject_teacher_id');
+        $allsubjects=Subject::select('id','subject_name');
         
         if($request->ajax()){
             $allsubjects = DataTables::of ($allsubjects)
-
-            ->addColumn ('subject_teacher_id',function(Subject $subject){
-                return $subject->subjectteachers->name;
-            })
-
-            ->addColumn ('action',function($row){
-                return 
-                '
-                    <a href="#" title="edit pupil details" class="btn btn-success editpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-edit"></i></a>
-
-                    <a href="/viewsubjectdetails/'.$row->id.'" target="_blank" title="view subject details"  class="btn btn-primary viewpupilpayment" data-id="'.$row->id.'"><i class="fa-solid fa-eye"></i></a>
-
-                    <a href="/viewpupilperfomance/'.$row->id.'" target="_blank" title="delete subject details"  class="btn btn-danger viewpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-trash"></i></a>
-                ';
-            })
-            ->rawColumns(['subject_teacher_id','action'])
             ->make(true);
 
             return $allsubjects;

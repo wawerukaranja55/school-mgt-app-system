@@ -100,7 +100,7 @@
 						<td>{{ $pupilresults->social_stud }}</td>
 					</tr>
 				  <tr style="background-color:rgb(207, 135, 240)">
-					  	<th colspan="6">Total Marks {{ $totalMarksAndMean[0]->total_marks }}/500<br> mean Grade {{ $totalMarksAndMean[0]->mean }}
+					  	<th colspan="6">Total Marks {{ $pupilresults->total_marks }}/500<br> mean Grade {{ $pupilresults->mean }}
 						</th>
 					  {{-- <th colspan="6">ReMarks:Pass</th> --}}
 				  </tr>

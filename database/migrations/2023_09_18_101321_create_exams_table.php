@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('exam_name');
             $table->string('term');
             $table->integer('year');
-            $table->boolean('is_active')->default('0');
             $table->timestamps();
         });
     }

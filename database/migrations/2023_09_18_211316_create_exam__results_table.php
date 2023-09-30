@@ -23,6 +23,10 @@ return new class extends Migration
             $table->integer('exam_id');
             $table->integer('student_id');
             $table->integer('class_id');
+            $table->integer('total_marks');
+            $table->integer('mean');
+            $table->integer('term');
+            $table->integer('year');
             $table->timestamps();
         });
     }

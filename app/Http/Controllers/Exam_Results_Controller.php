@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\Exam_pupil_Pivot;
 use App\Models\Exam_Result;
 use App\Models\Grade;
 use App\Models\Pupil;
+use App\Models\Student_Perfomance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
@@ -58,7 +60,7 @@ class Exam_Results_Controller extends Controller
     // add new details for a pupil page
     public function create_exams_results_page()
     {
-        $unfilledexams=Exam::where('is_active',0)->get();
+        $unfilledexams=Exam::get();
 
         $unfilledgrades=Grade::get();
 
@@ -194,58 +196,143 @@ class Exam_Results_Controller extends Controller
             ]);
         }else{
 
-            $examcount=Exam_Result::where(['exam_id'=>$data['exam_id'],'student_id'=>$data['pupil_id']])->count();
-            if($examcount>0){
-                $message="The Exam results for the pupil already exists.Kindly Check again.";
-                return response()->json([
-                    'status'=>400,
-                    'message'=>$message
-                ]);
-            }else{
-
-                $exam_results=new Exam_Result();
-                $exam_results->class_id=$data['class_id'];
-                $exam_results->exam_id=$data['exam_id'];
-                $exam_results->student_id=$data['pupil_id'];
-                $exam_results->maths=$data['maths'];
-                $exam_results->cre=$data['cre'];
-                $exam_results->sci=$data['science'];
-                $exam_results->eng=$data['eng'];
-                $exam_results->kiswa=$data['kiswa'];
-                $exam_results->social_stud=$data['social_stud'];
-                $exam_results->home_sci=$data['home_sci'];
-                $exam_results->save();
-
-                $examyear=Exam::where('id',$data['exam_id'])->pluck('year');
-
-                $totalmarks=array_sum([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]);
-
-                $average = $totalmarks / count([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]);
+            if($request->results_id)
+            {
                 
-                $finalavg=round($average, 2);
+                $exam_results=Exam_Result::find($request->results_id);
 
-                $exam_results->pupilexams()->attach(request('exam_id'),['pupil_id' => $data['pupil_id'],'total_marks' => $totalmarks,'mean' => $finalavg,'term' => $data['term'],'year' => $examyear[0]]);
-            
-                $message="Exam Results Saved Successfully";
+                $exam_results->update([
+                    $exam_results->class_id=$data['class_id'],
+                    $exam_results->exam_id=$data['exam_id'],
+                    $exam_results->student_id=$data['pupil_id'],
+                    $exam_results->maths=$data['maths'],
+                    $exam_results->cre=$data['cre'],
+                    $exam_results->sci=$data['science'],
+                    $exam_results->eng=$data['eng'],
+                    $exam_results->kiswa=$data['kiswa'],
+                    $exam_results->social_stud=$data['social_stud'],
+                    $exam_results->home_sci=$data['home_sci'],
+
+                    $examyear=Exam::where('id',$data['exam_id'])->pluck('year'),
+
+                    $totalmarks=array_sum([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]),
+
+                    $average = $totalmarks / count([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]),
+                    
+                    $finalavg=round($average, 2),
+
+                    $exam_results->total_marks=$totalmarks,
+
+                    $exam_results->mean=$finalavg,
+
+                    $exam_results->year=$examyear[0],
+
+                    $exam_results->term=$data['term']
+                ]);
+                
+                $message="Exam Results Updated Successfully";
 
                 return response()->json([
                     'status'=>200,
                     'message'=>$message,
                     'pupilid'=>$data['pupil_id']
                 ]);
+            }else{
+
+                $examcount=Exam_Result::where(['exam_id'=>$data['exam_id'],'student_id'=>$data['pupil_id']])->count();
+                if($examcount>0){
+                    $message="The Exam results for the pupil already exists.Kindly Check again.";
+                    return response()->json([
+                        'status'=>400,
+                        'message'=>$message
+                    ]);
+                }else{
+
+                    $exam_results=new Exam_Result();
+                    $exam_results->class_id=$data['class_id'];
+                    $exam_results->exam_id=$data['exam_id'];
+                    $exam_results->student_id=$data['pupil_id'];
+                    $exam_results->maths=$data['maths'];
+                    $exam_results->cre=$data['cre'];
+                    $exam_results->sci=$data['science'];
+                    $exam_results->eng=$data['eng'];
+                    $exam_results->kiswa=$data['kiswa'];
+                    $exam_results->social_stud=$data['social_stud'];
+                    $exam_results->home_sci=$data['home_sci'];
+
+                    $examyear=Exam::where('id',$data['exam_id'])->pluck('year');
+
+                    $totalmarks=array_sum([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]);
+
+                    $average = $totalmarks / count([$data['maths'],$data['cre'],$data['science'],$data['eng'],$data['kiswa'],$data['social_stud'],$data['home_sci']]);
+                    
+                    $finalavg=round($average, 2);
+
+                    $exam_results->total_marks=$totalmarks;
+
+                    $exam_results->mean=$finalavg;
+
+                    $exam_results->year=$examyear[0];
+
+                    $exam_results->term=$data['term'];
+
+                    $exam_results->save();
+
+                    //check if there are previous means for the student
+                    $perfomance_count=Student_Perfomance::where(['pupil_id'=>$data['pupil_id'],'term'=>$data['term'],'year'=>$examyear[0]])->count();
+                    
+                    if($perfomance_count>0){
+                        $exam_means=Exam_Result::where(['student_id'=>$data['pupil_id'],'term'=>$data['term'],'year'=>$examyear[0]])->pluck('mean')->toArray();
+ 
+                        $finalmean=array_sum($exam_means);
+
+                        $examdonecount=Exam_Result::where(['student_id'=>$data['pupil_id'],'term'=>$data['term'],'year'=>$examyear[0]])->count();
+
+                        $avgTermMean=$finalmean/$examdonecount;
+
+                        $pupilperfomanceupdate=Student_Perfomance::where(['pupil_id'=>$data['pupil_id'],'term'=>$data['term'],'year'=>$examyear[0]])->first();
+
+                        $pupilperfomanceupdate->update([
+                            $pupilperfomanceupdate->mean=$avgTermMean,
+                        ]);
+
+                    }else{
+                        $student_perfomance=new Student_Perfomance();
+                        $student_perfomance->pupil_id=$data['pupil_id'];
+                        $student_perfomance->class_id=$data['class_id'];
+                        $student_perfomance->term=$data['term'];
+                        $student_perfomance->year=$examyear[0];
+                        $student_perfomance->mean=$finalavg;
+                        $student_perfomance->save();
+                    }
+                    //if exists,add the total mean n the latest then divide by no of exams
+                    // if doesnt create new one
+
+
+                    $message="Exam Results Saved Successfully";
+
+                    return response()->json([
+                        'status'=>200,
+                        'message'=>$message,
+                        'pupilid'=>$data['pupil_id']
+                    ]);
+                }
             }
         }
-        
     }
 
     public function get_pupil_results($id)
     {
         $editpupilresults=Exam_Result::find($id);
+        $termAndYear=$editpupilresults->get(['student_id','exam_id']);
+        $termyear=Exam::where('id',$termAndYear[0]->exam_id)->get(['year','term']);
+        
         if($editpupilresults)
         {
             return response()->json([
                 'status'=>200,
-                'editpupilresults'=>$editpupilresults
+                'editpupilresults'=>$editpupilresults,
+                'termyear'=>$termyear
             ]);
         } else {
             return response()->json([

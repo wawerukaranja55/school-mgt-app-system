@@ -14,11 +14,9 @@ class Manage_Documents_Controller extends Controller
     {
         $examid=((int) $exam_id);
         $pupilid=((int) $id);
-        $pupilresults=Exam_Result::with('pupilname','studentgrade','pupilexam')->where(['exam_id'=>$examid,'student_id'=>$pupilid])->first();
+        $pupilresults=Exam_Result::with('studentgrade','pupilexam')->where(['exam_id'=>$examid,'student_id'=>$pupilid])->first();
 
-        $totalMarksAndMean=Exam_pupil_Pivot::where(['exam_id'=>$examid,'pupil_id'=>$pupilid])->get(['total_marks','mean']);
-
-        return view('documents.pupil_report_card',compact('totalMarksAndMean','pupilresults'));
+        return view('documents.pupil_report_card',compact('pupilresults'));
     }
 
     // generate and download pdf
@@ -28,11 +26,8 @@ class Manage_Documents_Controller extends Controller
         $pupilid=((int) $id);
         $pupilresults=Exam_Result::with('pupilname','studentgrade','pupilexam')->where(['exam_id'=>$examid,'student_id'=>$pupilid])->first();
 
-        $totalMarksAndMean=Exam_pupil_Pivot::where(['exam_id'=>$examid,'pupil_id'=>$pupilid])->get(['total_marks','mean']);
-
         $data = [
             'pupilresults'=> $pupilresults,
-            'totalMarksAndMean' => $totalMarksAndMean
         ];
 
         view()->share($data);

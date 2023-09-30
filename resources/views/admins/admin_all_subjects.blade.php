@@ -39,13 +39,13 @@
                 <!-- Start Page Content -->
                 <!-- ============================================================== -->
                 
-                <div class="row" style="
+                {{-- <div class="row" style="
                 display: flex;
                 justify-content: center;">
                     <div class="col-md-12">
-                        <a class="btn btn-dark" href="{{ route('admin.create.pupil.page') }}">Create a new Subject</a>
+                        <a class="btn btn-dark" href="{{ route('admin.create.subject.page') }}">Create a new Subject</a>
                     </div>
-                </div>
+                </div> --}}
                 <div class="row">    
                     <div class="col-lg-12 col-md-10 mx-auto">
                         <div class="panel-heading mt-5" style="text-align: center; font-size:18px;"> 
@@ -58,9 +58,6 @@
                                     <tr>              
                                       <td>id</td>
                                       <td>Subject Name</td>
-                                      <td>Subject Teacher</td>
-                                      <td>Grades</td>
-                                      <td>Action</td>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -87,101 +84,8 @@
          ajax:"{{ route('admin.get_all_subjects') }}",
          columns: [    
             { data: 'id' },
-            { data: 'subject_name' },
-            { data: 'subject_teacher_id', name:'subject_teacher_id.subjectteachers', orderable:true,searchable:true},
-            { data:
-                function (row) {
-                let classes= [];
-                    $(row.subjectgrades).each(function (i, e)
-                    {
-                        classes.push(e.grade_name,);
-                    });
-                    return '<input readonly=" " class="subjectgrade bg-dark text-white" style="" value="' + classes + '" data-id="' + row.id + '">';
-                }, name: 'subjectgrades.grade_name'
-            },
-            { data: 'action',name:'action',orderable:false,searchable:false },
+            { data: 'subject_name' }
          ],
       });
-
-        // show form for assigning the teacher a class
-        $(document).on('click','.assigngrade',function(e){
-            e.preventDefault();
-
-            var user_id=$(this).val();
-
-            var url = '{{ route("admin.get_teacher_class", ":id") }}';
-                    url = url.replace(':id', user_id);
-            $('#assignteachermodal').modal('show');
-
-            $.ajax({
-                type:"GET",
-                url:url,
-                processData: false,
-                contentType: false,
-                success:function(response)
-                {
-                    console.log(response);
-                    if (response.status==404)
-                    {
-                        alert(response.message);
-                        $('#assignteachermodal').modal('hide');
-                    } 
-                    else
-                    {
-                        $('#edit_name').val(response.teacherdata.name);
-                        $('#teachergrade_id').val(response.teacherdata.id);
-
-                        $('#gradeid').val(response.teacherdata.classes.id);
-                        $('#gradeid').select2();
-                        
-                                    
-                    }
-                }
-            })
-        })
-
-          // Update role for an admin
-          $(document).on('submit','#assignteacheragrade',function(e){
-              e.preventDefault();
-
-              var teacherid=$('#teachergrade_id').val();
-              var url = '{{ route("admin.assign-class", ":id") }}';
-                    url = url.replace(':id', teacherid);
-              var gradename = $('#gradeid').val();
-              
-              $.ajax({
-                type:"POST",
-                url:url,
-                data:$("#assignteacheragrade").serialize(),
-                success:function(response)
-                {
-                    console.log(response);
-                    if (response.status==404)
-                    {
-                        alert(response.message);
-
-                    } 
-                    else if (response.status==200)
-                    {
-                        $('#assignteachermodal').modal('hide');
-                        allteacherstable.ajax.reload();
-                        $('#edit_name').val('');
-                        $('#gradeid').val('');
-                        $('#teachergrade_id').val('');
-
-                        swal.fire({
-                            title: response.message,
-                            showClass: {
-                                popup: 'animate__fadeOutDown'
-                            },
-                            hideClass: {
-                                popup: 'animate__fadeOutUpBig'
-                            },
-                            timer:3000
-                        });
-                    }
-                }
-              })
-          })
     </script>
 @stop

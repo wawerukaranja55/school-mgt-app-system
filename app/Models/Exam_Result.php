@@ -11,7 +11,8 @@ class Exam_Result extends Model
 
     protected $table = 'exam__results';
     
-    protected $fillable = ['class_id','exam_id','student_id','maths','cre','social_stud','sci','eng','kiswa','home_sci'];
+    protected $fillable = ['class_id','exam_id','student_id','maths','cre','social_stud','sci','eng','kiswa','home_sci',
+    'total_marks','mean','year','term'];
 
     function pupilname(){
         return $this->belongsTo('App\Models\Pupil','student_id','id');
@@ -23,9 +24,5 @@ class Exam_Result extends Model
 
     function studentgrade(){
         return $this->belongsTo('App\Models\Grade','class_id','id');
-    }
-
-    function pupilexams(){
-        return $this->belongsToMany('App\Models\Exam','exam_pupils','pupil_id','exam_id','total_marks','mean','year','term');
     }
 }

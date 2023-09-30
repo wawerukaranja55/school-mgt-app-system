@@ -7,6 +7,7 @@ use App\Models\Pupil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\Student_Perfomance;
 
 class Pupil_Controller extends Controller
 {
@@ -32,10 +33,6 @@ class Pupil_Controller extends Controller
                 return 
                 '
                     <a href="#" title="edit pupil details" class="btn btn-success editpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-edit"></i></a>
-
-                    <a href="/viewpupilpaymentslip/'.$row->id.'" target="_blank" title="view pupil payment slip"  class="btn btn-primary viewpupilpayment" data-id="'.$row->id.'"><i class="fa-solid fa-dollar"></i></a>
-
-                    <a href="/viewpupilperfomance/'.$row->id.'" target="_blank" title="view pupil performance"  class="btn btn-warning viewpupildetails" data-id="'.$row->id.'"><i class="fa-solid fa-eye"></i></a>
                 ';
             })
             ->rawColumns(['grade_id','action'])
@@ -82,33 +79,114 @@ class Pupil_Controller extends Controller
             ]);
         }else{
 
-            $pupilcount=Pupil::where('pupil_reg_number',$data['pupil_reg_number'])->count();
-            if($pupilcount>0){
-                $message="The Registration is regstered for Another Pupil.Kindly Check the it again.";
-                return response()->json([
-                    'status'=>400,
-                    'message'=>$message
+            if($request->edit_pupil_id)
+            {
+                
+                $pupil_details=Pupil::find($request->edit_pupil_id);
+
+                $pupil_details->update([
+                    $pupil_details->pupil_name=$data['pupil_name'],
+                    $pupil_details->pupil_guardian_name=$data['pupil_guardian_name'],
+                    $pupil_details->pupil_guardian_phone=$data['pupil_guardian_phone'],
+                    $pupil_details->pupil_reg_number=$data['pupil_reg_number'],
+                    $pupil_details->year_joined=$data['year_joined'],
+                    $pupil_details->grade_id=$data['grad_id']
                 ]);
-            }else{
-
-                $pupil=new Pupil();
-                $pupil->pupil_name=$data['pupil_name'];
-                $pupil->pupil_guardian_name=$data['pupil_guardian_name'];
-                $pupil->pupil_guardian_phone=$data['pupil_guardian_phone'];
-                $pupil->pupil_reg_number=$data['pupil_reg_number'];
-                $pupil->year_joined=$data['year_joined'];
-                $pupil->grade_id=$data['grad_id'];
-                $pupil->save();
-
-                $message="Pupil data registered Successfully";
+                
+                $message="Pupil data Updated Successfully";
 
                 return response()->json([
                     'status'=>200,
                     'message'=>$message
                 ]);
+            }else{
+
+                $pupilcount=Pupil::where('pupil_reg_number',$data['pupil_reg_number'])->count();
+                if($pupilcount>0){
+                    $message="The Registration is regstered for Another Pupil.Kindly Check the it again.";
+                    return response()->json([
+                        'status'=>400,
+                        'message'=>$message
+                    ]);
+                }else{
+
+                    $pupil=new Pupil();
+                    $pupil->pupil_name=$data['pupil_name'];
+                    $pupil->pupil_guardian_name=$data['pupil_guardian_name'];
+                    $pupil->pupil_guardian_phone=$data['pupil_guardian_phone'];
+                    $pupil->pupil_reg_number=$data['pupil_reg_number'];
+                    $pupil->year_joined=$data['year_joined'];
+                    $pupil->grade_id=$data['grad_id'];
+                    $pupil->save();
+
+                    $message="Pupil data registered Successfully";
+
+                    return response()->json([
+                        'status'=>200,
+                        'message'=>$message
+                    ]);
+                }
             }
+            
         }
     }
 
-    
+    //store pupil details 
+    public function graduate_pupil(Request $request)
+    {
+        $data=$request->all();
+        
+        $pupil_details=Pupil::find($request->edit_pupil_id);
+
+        $pupil_details->update([
+            $pupil_details->grade_id=$data['pupilgrade']
+        ]);
+
+        $pupildetailsupdate=Student_Perfomance::where(['pupil_id'=>$request->edit_pupil_id,'term'=>$request->pupil_term,'year'=>$request->pupil_year])->first();
+
+        $pupildetailsupdate->update([
+            $pupildetailsupdate->class_id=$data['pupilgrade']
+        ]);
+        
+        $message="Pupil Graduated to the next class Successfully";
+
+        return response()->json([
+            'status'=>200,
+            'message'=>$message
+        ]);
+    }
+
+    public function get_pupil_details($id)
+    {
+        $editpupildetails=Pupil::find($id);
+        if($editpupildetails)
+        {
+            return response()->json([
+                'status'=>200,
+                'editpupildetails'=>$editpupildetails,
+            ]);
+        } else {
+            return response()->json([
+                'status'=>404,
+                'message'=>'Details Not Found'
+            ]);
+        }
+    }
+
+    public function get_pupil_grade($id)
+    {
+        $pupil_grade=Pupil::with('pupilgrade')->find($id);
+        if($pupil_grade)
+        {
+            return response()->json([
+                'status'=>200,
+                'pupil_grade'=>$pupil_grade,
+            ]);
+        } else {
+            return response()->json([
+                'status'=>404,
+                'message'=>'Details Not Found'
+            ]);
+        }
+    }
 }

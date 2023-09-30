@@ -67,7 +67,7 @@
          serverside:true,
          responsive:true,
 
-         ajax:"{{ route('admin.get_all_grades') }}",
+         ajax:"{{ route('admin.get_all_classes') }}",
          columns: [    
             { data: 'id' },
             { data: 'grade_name' },

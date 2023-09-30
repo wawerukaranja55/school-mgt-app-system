@@ -1,5 +1,5 @@
 @extends('admins.admin_layout')
-@section('title','Add Pupil Details ')
+@section('title','All Exams')
 @section('content')
 
     <!-- ============================================================== -->
@@ -8,12 +8,12 @@
             <div class="page-breadcrumb">
                 <div class="row">
                     <div class="col-12 d-flex no-block align-items-center">
-                        <h4 class="page-title">Exam Details</h4>
+                        <h4 class="page-title">All Past and Recent Exams in the school</h4>
                         <div class="ms-auto text-end">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Add exam details</li>
+                                    <li class="breadcrumb-item active" aria-current="page">All Exams</li>
                                 </ol>
                             </nav>
                         </div>
@@ -31,54 +31,29 @@
                 <!-- Start Page Content -->
                 <!-- ============================================================== -->
                 
-                <div class="row" style="
-                display: flex;
-                justify-content: center;">
-                    <div class="col-md-12">
-                        <a class="btn btn-dark" href="{{ route('admin.pupils.page') }}">All Pupils in the school</a>
-                    </div>
-                </div>
                 <div class="row">    
                     <div class="col-lg-10 col-md-10 mx-auto">
                         <div class="panel-heading mt-5" style="text-align: center; font-size:18px;"> 
-                            <h3 class="mb-2 panel-title">Add an Exam</h3>
+                            <h3 class="mb-2 panel-title">All Exams</h3>
                         </div>
-                        <form method="POST" action="javascript:void(0);" id="add-new-exam-form" class="form-horizontal" role="form" style="margin-bottom: 100px;">
-                            @csrf
-                            <div class="card padding-card product-card">
-                                <div class="card-body">
-                                    <div class="row section-groups">
-                                        <div class="form-group inputdetails col-sm-12">
-                                            <label>Exam Name<span class="text-danger inputrequired">*</span></label>
-                                            <input type="text" class="form-control text-white bg-dark exam-name" required name="exam_name" placeholder="for example, Opener Term 1 2023 Exam">
-                                        </div>
-                                    </div>
-
-                                    <div class="row section-groups">
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Term of the year<span class="text-danger inputrequired">*</span></label>
-                                            <select required id="term" name="term" class="adminselect2 form-control text-white bg-dark" style="width:100%;">
-                                                <option disabled selected>Select the Term of the Year </option>
-                                                    @foreach($allterms as $term)
-                                                    <option value="{{ $term->id }}">
-                                                        {{ $term->term_name }}</option>
-                                                    @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group inputdetails col-sm-6">
-                                            <label>Year<span class="text-danger inputrequired">*</span></label>
-                                            <input type="numbe" class="form-control text-white bg-dark" required id="year" name="year" placeholder="Write the year">
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div class="col-lg-10 mx-auto">
+                                <ul class="alert alert-warning d-none error_list"></ul>
+                               <table id="allexamstable" class="table table-striped table-bordered" style="width:100%; margin-top:50px;">
+                                  <thead>
+                                    <tr>              
+                                      <td>id</td>
+                                      <td>Exam Name</td>
+                                      <td>Term</td>
+                                      <td>Year</td>
+                                      <td>Action</td>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                  </tbody>
+                                </table>
                             </div>
-                            
-                            <ul class="alert alert-warning d-none error_list"></ul>
-                            <div style="display: flex;justify-content:space-around;">
-                                <button type="submit" class="btn btn-success" style="width:60%;text-align:center;">SUBMIT</button>
-                            </div>
-                            
-                        </form>
+                         </div>
                     </div>
                 </div> 
             </div>
@@ -87,16 +62,63 @@
 
 @endsection
 
-@section('adminaddexamscript')
+@section('adminallexamsscript')
     <script>
-        $(document).on('submit','#add-new-exam-form',function()
+        // show activated houses of the house in a datatable
+        var allexamstable = $('#allexamstable').DataTable({
+            processing:true,
+            serverside:true,
+            responsive:true,
+
+            ajax:"{{ route('admin.get_all_exams') }}",
+            columns: [    
+                { data: 'id' },
+                { data: 'exam_name' },
+                { data: 'term' },
+                { data: 'year' },
+                { data: 'action',name:'action',orderable:false,searchable:false },
+            ],
+        });
+
+        $(document).on('click','.editexamdetails',function(){
+
+            var examid=$(this).data('id');
+
+            $('#editexamdetailsmodal').modal('toggle');
+
+            $.ajax({
+            url:'{{ url("admin/exam",'') }}' + '/' + examid + '/edit',
+            method:'GET',
+            processData: false,
+            contentType: false,
+            success:function(response)
+            {
+                console.log(response)
+                if (response.status==404)
+                {
+                    alert(response.message);
+                } 
+                else if(response.status==200)
+                {
+                    $('#editexamid').val(response.exam.id);
+                    $('#edit_exam_name').val(response.exam.exam_name);
+                    $('#edit_exam_year').val(response.exam.year);
+                    $('#edit_exam_term').val(response.exam.term);
+                }
+            }
+            })
+        });
+
+        $(document).on('submit','#editexamdetails',function()
         {
             var url = '{{ route("admin.store.exam") }}';
 
-            $('.error_list').html(" ");
+            console.log(url);
 
-            var form = $('#add-new-exam-form')[0];
+            $('.error_list').html(" ");
+            var form = $('#editexamdetails')[0];
             var formdata=new FormData(form);
+
             $.ajax({
                 url:url,
                 method:'POST',
@@ -108,6 +130,7 @@
                 console.log(response);
                 if (response.status==405)
                 {
+                    $('.error_list').html(" ");
                     $('.error_list').removeClass('d-none');
                     $.each(response.message,function(key,err_value)
                     {
@@ -116,9 +139,14 @@
                 } 
                 else if (response.status==200)
                 {
-                    $('.exam-name').val('');
-                    $('#term').val('');
-                    $('#year').val('');
+                    $('#editexamid').val('');
+                    $('#edit_exam_name').val('');
+                    $('#edit_exam_year').val('');
+                    $('#edit_exam_term').val('');
+
+                    $('#editexamdetailsmodal').modal('hide');
+
+                    allexamstable.ajax.reload( null, false );
 
                     swal.fire({
                         title: response.message,
@@ -147,6 +175,5 @@
                 }
             });
         });
-
     </script>
 @stop

@@ -1,5 +1,5 @@
 @extends('admins.admin_layout')
-@section('title','Exams Results Management')
+@section('title','Pupil Perfomance Management')
 @section('content')
 
     <!-- ============================================================== -->

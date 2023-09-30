@@ -18,7 +18,7 @@ class Teachers_Controller extends Controller
     // get all pupils to display into datatable
     public function get_teachers(Request $request)
     {
-        $allteachers=User::with(['classes','roles'])->select('id','name','email','is_approved','grade_id','role_id');
+        $allteachers=User::with(['classes','roles'])->where('role_id','!=','1')->select('id','name','email','is_approved','grade_id','role_id');
         
         if($request->ajax()){
             $allteachers = DataTables::of ($allteachers)

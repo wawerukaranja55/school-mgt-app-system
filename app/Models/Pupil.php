@@ -21,4 +21,8 @@ class Pupil extends Model
     {
         return $this->hasMany(Exam_Result::class, 'student_id');
     }
+
+    function pupilresultsmean(){
+        return $this->belongsTo('App\Models\Student_Perfomance');
+    }
 }
